@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 14% 96%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 222 47% 11%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 20% 92%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 214 20% 92%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 88%;
+    --ring: 160 84% 39%;
+
+    --radius: 0.75rem;
+
+    --tile-border: 214 20% 90%;
+    --tile-active: 160 84% 39%;
+    --tile-active-foreground: 0 0% 100%;
+    --step-complete: 160 84% 39%;
+    --step-current: 222 47% 11%;
+    --step-pending: 215 12% 82%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 18% 10%;
+    --foreground: 210 15% 92%;
+
+    --card: 220 16% 14%;
+    --card-foreground: 210 15% 92%;
+
+    --popover: 220 16% 14%;
+    --popover-foreground: 210 15% 92%;
+
+    --primary: 210 15% 92%;
+    --primary-foreground: 220 18% 10%;
+
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 210 15% 85%;
+
+    --muted: 220 12% 18%;
+    --muted-foreground: 215 10% 55%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 14% 22%;
+    --input: 220 14% 22%;
+    --ring: 160 84% 39%;
+
+    --tile-border: 220 14% 22%;
+    --tile-active: 160 84% 39%;
+    --tile-active-foreground: 0 0% 100%;
+    --step-complete: 160 84% 39%;
+    --step-current: 210 15% 92%;
+    --step-pending: 220 12% 28%;
+
+    --sidebar-background: 220 16% 12%;
+    --sidebar-foreground: 210 15% 85%;
+    --sidebar-primary: 210 15% 92%;
+    --sidebar-primary-foreground: 220 16% 12%;
+    --sidebar-accent: 220 14% 18%;
+    --sidebar-accent-foreground: 210 15% 85%;
+    --sidebar-border: 220 14% 22%;
+    --sidebar-ring: 160 84% 39%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display font-semibold;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* ── Mesh background (static: an endless animation of 80px-blurred shapes keeps
+      the phone's GPU busy the whole time the app is open) ── */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(135deg, hsl(220 14% 96%) 0%, hsl(214 20% 93%) 50%, hsl(220 16% 97%) 100%);
+}
+
+.dark .mesh-bg {
+  background: linear-gradient(135deg, hsl(220 18% 10%) 0%, hsl(220 16% 12%) 50%, hsl(220 18% 10%) 100%);
+}
+
+.mesh-bg .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.45;
+}
+
+.dark .mesh-bg .blob {
+  opacity: 0.15;
+}
+
+.mesh-bg .blob:nth-child(1) {
+  width: 500px; height: 500px;
+  background: #dbeafe;
+  top: -10%; left: -10%;
+}
+.dark .mesh-bg .blob:nth-child(1) { background: #1e3a5f; }
+
+.mesh-bg .blob:nth-child(2) {
+  width: 450px; height: 450px;
+  background: #d1fae5;
+  top: 35%; right: -15%;
+}
+.dark .mesh-bg .blob:nth-child(2) { background: #064e3b; }
+
+.mesh-bg .blob:nth-child(3) {
+  width: 600px; height: 600px;
+  background: #e0e7ff;
+  bottom: -15%; left: 20%;
+}
+.dark .mesh-bg .blob:nth-child(3) { background: #1e1b4b; }
+
+/* ── Glass panels ── */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  }
+  .dark .glass {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.03);
+  }
+  .dark .glass-card {
+    background: rgba(30, 41, 59, 0.45);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
+  }
+  .dark .glass-nav {
+    background: rgba(15, 23, 42, 0.8);
+    border-top-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ── Table rows (report wizard) ── */
+.table-row-card { animation: row-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── "PDF gotowy" sheet ── */
+.rr-backdrop { animation: rr-fade 0.2s ease-out both; }
+.rr-panel { animation: rr-rise 0.38s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+.rr-paper { animation: rr-print 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) 0.15s both; }
+.rr-line { transform-origin: left center; animation: rr-line 0.35s ease-out both; }
+.rr-paper > .rr-line:nth-child(1) { animation-delay: 0.45s; }
+.rr-paper > .rr-line:nth-child(2) { animation-delay: 0.55s; }
+.rr-paper > .rr-line:nth-child(3) { animation-delay: 0.62s; }
+.rr-paper > .rr-line:nth-child(4) { animation-delay: 0.68s; }
+.rr-paper > .rr-line:nth-child(5) { animation-delay: 0.76s; }
+.rr-paper > .rr-line:nth-child(6) { animation-delay: 0.86s; }
+.rr-sign path { stroke-dasharray: 160; stroke-dashoffset: 160; animation: rr-sign 0.7s ease-in-out 0.95s forwards; }
+.rr-check { animation: rr-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) 1.5s both; }
+@keyframes rr-fade { from { opacity: 0; } }
+@keyframes rr-rise { from { transform: translateY(24px); opacity: 0; } }
+@keyframes rr-print { from { transform: translateY(100%); } }
+@keyframes rr-line { from { transform: scaleX(0); opacity: 0; } }
+@keyframes rr-sign { to { stroke-dashoffset: 0; } }
+@keyframes rr-pop { from { transform: scale(0); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .table-row-card, .rr-backdrop, .rr-panel, .rr-paper, .rr-line, .rr-check { animation: none; }
+  .rr-sign path { animation: none; stroke-dashoffset: 0; }
+}
