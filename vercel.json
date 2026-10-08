@@ -1,0 +1,30 @@
+{
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(self), microphone=(self), geolocation=(), payment=(self)" },
+        { "key": "X-DNS-Prefetch-Control", "value": "on" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/regulamin", "destination": "/regulamin.html" },
+    { "source": "/prywatnosc", "destination": "/prywatnosc.html" },
+    { "source": "/kontakt", "destination": "/kontakt.html" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/google05bcb868e7adc9d7.html", "destination": "/google05bcb868e7adc9d7.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
