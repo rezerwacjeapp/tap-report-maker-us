@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    // A sign-in link (email confirmation, Google) that lands here carries the session in the URL - hand it to the app
+    if (/(^#|&)(access_token|error_description)=/.test(location.hash) || /[?&](code|error_description)=/.test(location.search)) {
+      location.replace("/login" + location.search + location.hash);
+    }
+  </script>
   <title>RaportON | Service reports and inspection PDFs from your phone</title>
   <meta name="description" content="Service reports and inspection checklists from your phone: readings tables, photos, customer signature, PDF by text or email, and next-service reminders. Templates for HVAC, plumbing, fire protection, pest control and rentals.">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -444,7 +450,7 @@
               <span class="mk">1</span>
             </div>
             <div class="sh-rule"></div>
-            <div class="sh-title"><span>HVAC MAINTENANCE REPORT</span><span class="sh-nr">047/2026</span><span class="mk">2</span></div>
+            <div class="sh-title"><span>HVAC MAINTENANCE REPORT</span><span class="sh-nr">2026-047</span><span class="mk">2</span></div>
             <table class="sh-data">
               <tr><th>Customer</th><td data-k="client"></td></tr>
               <tr><th>Service address</th><td data-k="addr"></td></tr>
@@ -479,7 +485,7 @@
 
           <div class="phone" aria-hidden="true">
             <div class="ph-screen" id="phScreen">
-              <div class="ph-bar"><span class="ph-back">‹</span><b>HVAC Maintenance</b><span class="ph-num">047/2026</span></div>
+              <div class="ph-bar"><span class="ph-back">‹</span><b>HVAC Maintenance</b><span class="ph-num">2026-047</span></div>
               <div class="ph-scroll" id="phScroll">
                 <div class="ph-sec" data-sec="1">
                   <span class="ph-f">Customer<span class="ph-in" data-k="client"></span></span>
@@ -559,7 +565,7 @@
         <div class="doc-frame" id="docFrame"></div>
         <ol class="callouts">
           <li><h3>Your logo and company info</h3><p>Enter them once in your profile. They show up at the top of every document.</p></li>
-          <li><h3>Numbering takes care of itself</h3><p>Each report gets the next number automatically, for example 047/2026.</p></li>
+          <li><h3>Numbering takes care of itself</h3><p>Each report gets the next number automatically, for example 2026-047.</p></li>
           <li><h3>Tables for readings</h3><p>Units, extinguishers, circuits, meters&nbsp;- row by row from your phone. In the PDF, the table header repeats on every page.</p></li>
           <li><h3>Photos from the job</h3><p>Data plate, panel, the problem you found&nbsp;- the photo goes straight into the report.</p></li>
           <li><h3>Finger signature on screen</h3><p>Your customer signs on your phone. No more “I'll email it to you later.”</p></li>

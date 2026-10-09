@@ -413,15 +413,15 @@ export async function incrementReportCount(): Promise<void> {
 
 // ─── REPORT NUMBER ──────────────────────────────────────────
 
-const REPORT_NUMBER_RE = /^\s*(\d+)\s*\/\s*(\d{4})\s*$/;
+const REPORT_NUMBER_RE = /^\s*(\d{4})\s*-\s*(\d+)\s*$/;
 
 /**
- * Next free number "NNN/YYYY": the highest number used this year + 1.
+ * Next free number "YYYY-NNN": the highest number used this year + 1.
  * (Counting reports gave duplicates after a report was deleted.)
  */
 export async function getCloudNextReportNumber(): Promise<string> {
   const year = new Date().getFullYear();
-  const format = (n: number) => `${String(n).padStart(3, "0")}/${year}`;
+  const format = (n: number) => `${year}-${String(n).padStart(3, "0")}`;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return format(1);
@@ -432,12 +432,12 @@ export async function getCloudNextReportNumber(): Promise<string> {
       .from("reports")
       .select("report_number")
       .eq("user_id", user.id)
-      .like("report_number", `%/${year}`)
+      .like("report_number", `${year}-%`)
       .range(from, from + 999);
     if (error) throw error;
     for (const row of data || []) {
       const m = REPORT_NUMBER_RE.exec(row.report_number || "");
-      if (m && Number(m[2]) === year) max = Math.max(max, Number(m[1]));
+      if (m && Number(m[1]) === year) max = Math.max(max, Number(m[2]));
     }
     if (!data || data.length < 1000) break;
   }

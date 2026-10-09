@@ -291,5 +291,5 @@ export function getNextReportNumber(): string {
   counterData.count += 1;
   set(KEYS.REPORT_COUNTER, counterData);
   const num = String(counterData.count).padStart(3, "0");
-  return `${num}/${year}`;
+  return `${year}-${num}`;
 }

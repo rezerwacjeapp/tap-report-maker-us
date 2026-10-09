@@ -562,7 +562,7 @@ export default function ReportWizard() {
             className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
             value={draft.reportNumber || ""}
             onChange={(e) => update({ reportNumber: e.target.value })}
-            placeholder="e.g. 001/2026"
+            placeholder="e.g. 2026-001"
           />
         </div>
         )}

@@ -18,6 +18,19 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+/**
+ * Tells the server this browser is signed in, so "/" serves the app instead of
+ * the landing page (see middleware.ts). Not a credential - only a routing hint.
+ */
+function markSignedIn(signedIn: boolean) {
+  try {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `ro_session=${signedIn ? "1; Max-Age=31536000" : "; Max-Age=0"}; Path=/; SameSite=Lax${secure}`;
+  } catch {
+    // cookies blocked: "/" keeps showing the landing page, whose buttons lead into the app
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -30,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      markSignedIn(!!session);
     });
 
     // Listen for auth changes
@@ -37,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      markSignedIn(!!session);
 
       // Detect password recovery flow
       if (event === "PASSWORD_RECOVERY") {
