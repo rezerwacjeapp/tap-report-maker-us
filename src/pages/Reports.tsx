@@ -12,6 +12,7 @@ import { ReportReadySheet } from "@/components/ReportReadySheet";
 import { parseTable, tableColumns, filledRows, tableSearchText, type TableValue } from "@/lib/table-field";
 import { prepareReuse } from "@/lib/reuse-report";
 import { isISODate, formatDateUS, parseLocalDate } from "@/lib/report-utils";
+import { BADGE_COLORS, BADGE_LABELS, INDUSTRY_DOTS } from "@/lib/template-style";
 import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
   getCloudSnapshot, getCloudProfile, checkReportLimit, getCloudReportSignatures,
@@ -25,24 +26,6 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const INDUSTRY_DOTS: Record<string, string> = {
-  Wind: "bg-blue-500", Zap: "bg-amber-500", Home: "bg-purple-500",
-  Flame: "bg-orange-500", ShieldAlert: "bg-red-500", Droplets: "bg-cyan-500",
-  Sun: "bg-yellow-500", Fan: "bg-teal-500",
-};
-
-const BADGE_COLORS: Record<string, string> = {
-  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-};
-
-const BADGE_LABELS: Record<string, string> = {
-  Wind: "HVAC", Zap: "ELECTRIC", Home: "PROPERTY", Flame: "GAS", ShieldAlert: "FIRE",
-};
 
 function getTemplateIcon(templateName: string) {
   const s = STARTER_TEMPLATES.find((st) => st.name === templateName);

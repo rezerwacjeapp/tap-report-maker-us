@@ -7,6 +7,7 @@ import {
   checkReportLimit, getCloudDrafts, deleteCloudDraft, getCloudReportHistory, getCloudProfile, type CloudDraft,
 } from "@/lib/supabase-storage";
 import { computeReminders, reminderWhen, formatDateUS, parseLocalDate, type InspectionReminder } from "@/lib/report-utils";
+import { INDUSTRY_EMOJI, BADGE_COLORS, INDUSTRY_DOTS } from "@/lib/template-style";
 import { prepareReuse } from "@/lib/reuse-report";
 import { BrandLockup } from "@/components/BrandLogo";
 import { toast } from "sonner";
@@ -29,30 +30,6 @@ function getQuickStartIds(): Set<string> {
     return raw ? new Set(JSON.parse(raw)) : new Set();
   } catch { return new Set(); }
 }
-
-const INDUSTRY_COLORS: Record<string, string> = {
-  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-  Droplets: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
-  Sun: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
-  Fan: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-  FileText: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-};
-
-const INDUSTRY_DOTS: Record<string, string> = {
-  Wind: "bg-blue-500", Zap: "bg-amber-500", Home: "bg-purple-500",
-  Flame: "bg-orange-500", ShieldAlert: "bg-red-500", Droplets: "bg-cyan-500",
-  Sun: "bg-yellow-500", Fan: "bg-teal-500", FileText: "bg-emerald-500",
-};
-
-const INDUSTRY_EMOJI: Record<string, string> = {
-  Wind: "❄️", Zap: "⚡", Home: "🏠", Flame: "🔥",
-  ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
-  FileText: "📄",
-};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -420,7 +397,7 @@ const Index = () => {
             </p>
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
               {quickStartTemplates.map((tmpl) => {
-                const colorCls = INDUSTRY_COLORS[tmpl.icon] || "bg-muted text-muted-foreground";
+                const colorCls = BADGE_COLORS[tmpl.icon] || "bg-muted text-muted-foreground";
                 const emoji = INDUSTRY_EMOJI[tmpl.icon] || "📄";
                 return (
                   <button

@@ -11,32 +11,12 @@ import {
 import { toast } from "sonner";
 import { shareTemplate } from "@/lib/supabase-storage";
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { INDUSTRY_EMOJI, BADGE_COLORS, BADGE_LABELS } from "@/lib/template-style";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const BADGE_COLORS: Record<string, string> = {
-  Wind: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-  Zap: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  Home: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-  Flame: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-  ShieldAlert: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-  Droplets: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
-  Sun: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
-  Fan: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-};
-
-const BADGE_LABELS: Record<string, string> = {
-  Wind: "HVAC", Zap: "ELECTRIC", Home: "PROPERTY", Flame: "GAS",
-  ShieldAlert: "FIRE", Droplets: "PLUMBING", Sun: "SOLAR", Fan: "VENT",
-};
-
-const INDUSTRY_EMOJI: Record<string, string> = {
-  Wind: "❄️", Zap: "⚡", Home: "🏠", Flame: "🔥",
-  ShieldAlert: "🧯", Droplets: "💧", Sun: "☀️", Fan: "🌀",
-};
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
 
