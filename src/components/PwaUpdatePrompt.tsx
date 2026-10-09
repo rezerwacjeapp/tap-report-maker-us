@@ -20,9 +20,14 @@ export function PwaUpdatePrompt() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    // On the very first visit the service worker takes control of the page for the
+    // first time - that is not an update, so no prompt then.
+    const hadController = !!navigator.serviceWorker.controller;
+
     const handleControllerChange = () => {
-      // New SW took control — reload to get fresh assets
-      // Only auto-reload if not currently filling a form
+      // New SW took control — prompt to reload for fresh assets
+      // (shown only when not filling a form, see BUSY_PATHS)
+      if (!hadController) return;
       setShowUpdate(true);
     };
 
@@ -65,7 +70,7 @@ export function PwaUpdatePrompt() {
         className="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-accent text-white shadow-lg shadow-accent/25 active:scale-[0.97] transition-transform text-sm font-medium"
       >
         <RefreshCw className="h-4 w-4" />
-        Nowa wersja dostępna. Dotknij, aby odświeżyć
+        New version available. Tap to refresh
       </button>
     </div>
   );

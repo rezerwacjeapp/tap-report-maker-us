@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | RaportON</title>
+  <meta name="description" content="How RaportON collects, uses and protects personal information.">
+  <link rel="canonical" href="https://raporton.com/privacy">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --primary: #0f172a; --text: #334155; --text-muted: #64748b; --accent: #10b981; --accent-ink: #047857; --accent-hover: #059669; --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.7); }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', system-ui, sans-serif; color: var(--text); background: #f0f2f5; -webkit-font-smoothing: antialiased; overflow-x: hidden; line-height: 1.7; }
+    .mesh-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 50%, #f5f7fa 100%); }
+    .mesh-bg .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: drift 20s ease-in-out infinite alternate; }
+    .mesh-bg .blob:nth-child(1) { width: 500px; height: 500px; background: #dbeafe; top: -10%; left: -5%; }
+    .mesh-bg .blob:nth-child(2) { width: 400px; height: 400px; background: #d1fae5; bottom: -10%; right: -5%; animation-delay: -8s; }
+    @keyframes drift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,-10px) scale(1.02); } }
+    @media (prefers-reduced-motion: reduce) { .mesh-bg .blob { animation: none; } html { scroll-behavior: auto; } }
+
+    header { position: sticky; top: 0; z-index: 50; padding: 1rem 1.5rem; }
+    .header-bar { max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+    .brand { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.03em; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: .45rem; }
+    .brand .on { color: var(--accent); }
+    .back-link { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+    .back-link:hover { color: var(--primary); }
+
+    main { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem 4rem; }
+    .content-card { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 2rem; padding: 3rem; box-shadow: 0 8px 32px rgba(0,0,0,0.04); }
+    @media (max-width: 640px) { main { margin-top: 1.5rem; padding: 0 1rem 3rem; } .content-card { padding: 1.5rem 1.25rem; border-radius: 1.5rem; } }
+
+    h1 { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.03em; margin-bottom: 0.5rem; line-height: 1.2; }
+    .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2.5rem; margin-bottom: 0.75rem; scroll-margin-top: 6rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: var(--primary); margin-top: 1.25rem; margin-bottom: 0.4rem; }
+    p, li, td, th { font-size: 0.95rem; color: var(--text); font-weight: 300; }
+    strong { font-weight: 600; color: var(--primary); }
+    ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    ol li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; list-style: disc; }
+    ul li { margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    a { color: var(--accent-ink); }
+    .caps { text-transform: none; font-weight: 400; letter-spacing: 0.01em; }
+    .notice { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.22); border-radius: 1rem; padding: 1rem 1.25rem; margin-bottom: 2rem; }
+    .notice p, .notice li { font-size: 0.92rem; }
+    .notice p:last-child, .notice ul:last-child { margin-bottom: 0; }
+    .toc { columns: 2; column-gap: 2rem; padding-left: 1.25rem; margin-bottom: 1.5rem; }
+    .toc li { font-size: 0.88rem; margin-bottom: 0.25rem; break-inside: avoid; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .table-wrap { overflow-x: auto; margin-bottom: 1rem; border: 1px solid rgba(226,232,240,0.9); border-radius: 0.85rem; background: rgba(255,255,255,0.5); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(226,232,240,0.9); }
+    th { font-weight: 600; color: var(--primary); background: rgba(241,245,249,0.8); }
+    tr:last-child td { border-bottom: 0; }
+    address { font-style: normal; }
+
+    footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+    footer a:hover { color: var(--primary); }
+    footer .links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+<div class="mesh-bg" aria-hidden="true"><div class="blob"></div><div class="blob"></div></div>
+
+<header>
+  <div class="header-bar">
+    <a href="/" class="brand" aria-label="RaportON - home"><img src="/favicon.svg" alt="" width="24" height="24"><span>Raport<span class="on">ON</span></span></a>
+    <a href="/" class="back-link">← Home</a>
+  </div>
+</header>
+
+<main>
+  <div class="content-card">
+    <h1>Privacy Policy</h1>
+    <p class="subtitle">Last updated: October 9, 2026</p>
+
+    <div class="notice">
+      <p><strong>The short version</strong></p>
+      <ul>
+        <li>We collect what we need to run RaportON: your account, your company profile and the reports you create.</li>
+        <li>We don't sell or share your personal information, and we don't use advertising or tracking cookies.</li>
+        <li>Your data is stored with our providers in the United States.</li>
+        <li>You can access, export or delete your data at any time by emailing <a href="mailto:support@raporton.com">support@raporton.com</a>.</li>
+      </ul>
+    </div>
+
+    <h2 id="who">1. Who we are</h2>
+    <p>This Privacy Policy explains how RaportON (“<strong>we</strong>”, “<strong>us</strong>”) handles personal information when you visit raporton.com or use the RaportON web app (together, the “<strong>Service</strong>”).</p>
+    <p>RaportON is operated by Andrzej Król, an individual conducting an unregistered business activity in Poland, ul. Słoneczna 10a, 33-383 Tylicz, Poland, email <a href="mailto:support@raporton.com">support@raporton.com</a>. For the information described in Section 2 - except the information about your customers that you put into reports (see Section 5) - we are the “controller” under the EU General Data Protection Regulation (GDPR) and the business responsible for it under U.S. state privacy laws. Because we are established in the European Union, we apply the GDPR to all users, wherever they live.</p>
+
+    <h2 id="collect">2. Information we collect</h2>
+    <h3>Information you give us</h3>
+    <ul>
+      <li><strong>Account:</strong> your email address and password. Passwords are stored by our authentication provider only in hashed form; we can't see them. If you use Sign in with Google, we receive your name, email address and profile picture link from Google.</li>
+      <li><strong>Company profile:</strong> company name, address, phone, license number, logo and any other fields you add. This appears in the header of your PDFs.</li>
+      <li><strong>Your content:</strong> templates, drafts and reports, including the information about your customers, readings, notes, photos and signatures you enter. We handle customer information on your behalf (see Section 5).</li>
+      <li><strong>Communications:</strong> when you email us or use our contact form - your name (optional), email address, topic and message.</li>
+    </ul>
+    <h3>Information created when you use the Service</h3>
+    <ul>
+      <li><strong>Subscription:</strong> your plan, its status, billing period dates and Stripe identifiers. Card details are collected and processed by Stripe; we never receive your full card number.</li>
+      <li><strong>Consents and settings:</strong> when you accepted the Terms and this Policy, whether you opted in to marketing emails, and your app preferences.</li>
+      <li><strong>Usage counters:</strong> how many reports you generate each month.</li>
+      <li><strong>Technical data:</strong> IP address, browser and device type, operating system, time of requests and error logs, recorded by our hosting providers when you use the Service.</li>
+      <li><strong>Data on your device:</strong> the app keeps your sign-in session, unfinished drafts, cached templates and preferences in your browser's local storage, and caches app files so it loads faster.</li>
+    </ul>
+
+    <h2 id="use">3. How we use information and our legal bases</h2>
+    <p>We use personal information only for the purposes below. The second column shows the legal basis under the GDPR.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Purpose</th><th>Legal basis (GDPR)</th></tr></thead>
+      <tbody>
+        <tr><td>Providing the Service: your account, generating PDFs, storing reports and templates, showing reminders</td><td>Contract - Art. 6(1)(b)</td></tr>
+        <tr><td>Processing payments and managing subscriptions</td><td>Contract - Art. 6(1)(b)</td></tr>
+        <tr><td>Service emails: sign-up confirmation, password resets, receipts, notices about changes to the Service, the Terms or this Policy</td><td>Contract - Art. 6(1)(b); legitimate interests - Art. 6(1)(f)</td></tr>
+        <tr><td>Customer support and answering your messages</td><td>Contract - Art. 6(1)(b); legitimate interests - Art. 6(1)(f)</td></tr>
+        <tr><td>Keeping the Service secure, preventing abuse and fixing errors</td><td>Legitimate interests - Art. 6(1)(f)</td></tr>
+        <tr><td>Occasionally asking for feedback about the Service (never advertising)</td><td>Legitimate interests - Art. 6(1)(f); you can object at any time</td></tr>
+        <tr><td>News and offers about RaportON - only if you opted in</td><td>Consent - Art. 6(1)(a); you can withdraw it at any time</td></tr>
+        <tr><td>Meeting tax, accounting and other legal obligations</td><td>Legal obligation - Art. 6(1)(c)</td></tr>
+        <tr><td>Establishing, exercising or defending legal claims</td><td>Legitimate interests - Art. 6(1)(f)</td></tr>
+      </tbody>
+    </table></div>
+    <p>We don't make decisions about you based solely on automated processing that have legal or similarly significant effects, and we don't build advertising profiles.</p>
+
+    <h2 id="share">4. How we share information</h2>
+    <p>We don't sell your personal information, and we don't share it for cross-context behavioral (targeted) advertising. We share it only as follows:</p>
+    <ol>
+      <li><strong>Service providers (sub-processors)</strong> that process data for us under contracts:
+        <ul>
+          <li><strong>Supabase, Inc.</strong> - database, authentication and file storage. Your data is stored in the United States (US East, Virginia).</li>
+          <li><strong>Vercel, Inc.</strong> - hosting of the website and app, content delivery network and server functions (United States and a global edge network).</li>
+          <li><strong>Stripe</strong> (Stripe, Inc. and its affiliates) - payment processing and subscription billing. Stripe also acts as an independent controller for some payment data under its own privacy policy.</li>
+          <li><strong>Google LLC</strong> - Sign in with Google (if you use it), web fonts on our public pages, and email hosting for our support mailbox.</li>
+          <li><strong>Web3Forms</strong> - delivery of messages sent through our contact form.</li>
+          <li><strong>Our transactional email provider</strong> - sending account emails such as sign-up confirmations and password resets.</li>
+        </ul>
+      </li>
+      <li><strong>Your browser's speech service.</strong> If you use voice dictation, your browser's built-in speech recognition (for example Google in Chrome or Apple in Safari) processes your voice under the browser maker's privacy terms. We receive only the resulting text.</li>
+      <li><strong>People you choose.</strong> When you send a PDF or share a template link, the information goes to the recipients and apps you pick.</li>
+      <li><strong>Legal and safety reasons.</strong> If required by law, a court order or a lawful request by public authorities, or if necessary to protect our rights, our users or others.</li>
+      <li><strong>Business transfers.</strong> In connection with a reorganization, merger, sale of assets or transfer of the Service to a company set up to operate it. The recipient will be bound by this Policy.</li>
+    </ol>
+
+    <h2 id="customer-data">5. Information about your customers</h2>
+    <p>When you enter information about your customers or other people into the Service, you decide what to collect and why: you are the controller (or “business”), and we act as your processor (or “service provider”). We process that information only to provide the Service to you, under the data processing terms in <a href="/terms#data-processing">Section 7 of our Terms of Service</a>. We don't use it for our own purposes, and we don't sell or share it. If one of your customers contacts us about their information, we will refer them to you. You are responsible for giving your customers any notices the law requires and for having a lawful basis to collect and share their information.</p>
+
+    <h2 id="transfers">6. International transfers</h2>
+    <p>We are based in Poland, and our providers store your data in the United States. Where the GDPR or UK GDPR applies to a transfer of personal data outside the European Economic Area or the UK, we rely on the European Commission's Standard Contractual Clauses and/or the EU-U.S. Data Privacy Framework (and its UK extension) where the recipient is certified under it.</p>
+
+    <h2 id="retention">7. How long we keep information</h2>
+    <ul>
+      <li><strong>Account, profile, templates and reports:</strong> while your account is active. Content you delete is removed from our active systems; when you delete your account, we delete your data within 30 days.</li>
+      <li><strong>Backups:</strong> overwritten on a rolling basis, typically within 30 days.</li>
+      <li><strong>Payment and billing records:</strong> as long as tax and accounting laws require (up to 5 years after the end of the tax year).</li>
+      <li><strong>Consent records and correspondence:</strong> as long as needed to handle your request and show that we acted properly, generally up to 3 years after our last contact.</li>
+      <li><strong>Technical logs:</strong> kept by our providers for short periods, generally no longer than 90 days.</li>
+      <li><strong>Data on your device:</strong> until you sign out, clear your browser data or delete it.</li>
+    </ul>
+    <p>We may keep information longer where the law requires it or to establish, exercise or defend legal claims.</p>
+
+    <h2 id="security">8. Security</h2>
+    <p>We use technical and organizational measures to protect your information, including encryption in transit (HTTPS/TLS), encryption at rest by our hosting provider, hashed passwords, row-level security so that each account can reach only its own data, and limited internal access. No system is completely secure, so please use a strong password and protect your devices. If a data breach affects your personal information, we will notify you and the authorities as the law requires.</p>
+
+    <h2 id="rights">9. Your rights and choices</h2>
+    <ol>
+      <li><strong>Everyone.</strong> Wherever you live, you can ask us to give you access to your personal information and a copy of it (also in a portable format), correct it, delete it, or restrict or object to certain processing (including feedback requests). You can withdraw your consent to marketing emails at any time with the unsubscribe link or by emailing us. Withdrawing consent doesn't affect processing that happened before.</li>
+      <li><strong>How to make a request.</strong> Email <a href="mailto:support@raporton.com">support@raporton.com</a> from the email address on your account. We may need to verify your identity. We'll respond within one month; for complex requests we may extend this by up to two months and will tell you if we do.</li>
+      <li><strong>EEA and UK users.</strong> You have the right to lodge a complaint with a supervisory authority - in Poland, the President of the Personal Data Protection Office (Prezes Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa, <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>) - or with the authority where you live or work.</li>
+      <li><strong>U.S. state privacy rights.</strong> Residents of California and other states with consumer privacy laws may have the right to know, access, correct and delete their personal information and to opt out of its sale, of sharing for targeted advertising, and of certain profiling. We don't sell or share personal information, don't use it for targeted advertising, and don't use sensitive personal information to infer characteristics about you. You can exercise your rights as described above, including through an authorized agent, and we won't discriminate against you for doing so. If we decline your request, you can appeal by replying to our decision; if we deny the appeal, you may contact your state attorney general. We treat Global Privacy Control signals as a request to opt out of sale and sharing. We don't respond to “Do Not Track” signals because we don't track you across websites. California “Shine the Light”: we don't share personal information with third parties for their own direct marketing.</li>
+    </ol>
+
+    <h2 id="cookies">10. Cookies and similar technologies</h2>
+    <p>We don't use advertising or analytics cookies or third-party trackers. The app uses your browser's local storage and a service worker for essential functions: keeping you signed in, saving drafts and settings, and loading faster. Our public pages remember whether you dismissed the cookie notice. The fonts on our public pages are loaded from Google Fonts, so your browser connects to Google's servers, which receive your IP address. You can clear stored data in your browser settings at any time, but the app may not work properly without it.</p>
+
+    <h2 id="children">11. Children</h2>
+    <p>The Service is for businesses and people aged 18 and over. We don't knowingly collect personal information from children. If you believe a child has given us personal information, contact us and we will delete it.</p>
+
+    <h2 id="changes">12. Changes to this Policy</h2>
+    <p>We may update this Policy. We'll post the new version on this page with a new “Last updated” date and, for material changes, notify you by email or in the app before they take effect.</p>
+
+    <h2 id="contact">13. Contact</h2>
+    <address>
+      <p>Questions or requests about your privacy:<br>RaportON - Andrzej Król<br>ul. Słoneczna 10a, 33-383 Tylicz, Poland<br>Email: <a href="mailto:support@raporton.com">support@raporton.com</a></p>
+    </address>
+  </div>
+</main>
+
+<footer>
+  <div>© 2026 RaportON. All rights reserved. · Created by <a href="https://akappstudio.pl" target="_blank" rel="noopener" style="color: var(--accent-ink); font-weight: 500;">akApp Studio</a></div>
+  <div class="links">
+    <a href="/terms">Terms of Service</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/contact">Contact</a>
+  </div>
+</footer>
+</body>
+</html>

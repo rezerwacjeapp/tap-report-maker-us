@@ -1,10 +1,10 @@
 import type { CustomFieldDef, TableColumnDef } from "./storage";
 
 /**
- * "Tabela" field values live in draft.customFields[fieldId] as a JSON string,
+ * "Table" field values live in draft.customFields[fieldId] as a JSON string,
  * so drafts, cloud reports (custom_fields JSONB) and snapshots need no migration.
  *
- *   {"t":1,"cols":[{"id":"c1","label":"Obwód"}],"rows":[{"_k":"a1","c1":"L1"}]}
+ *   {"t":1,"cols":[{"id":"c1","label":"Circuit"}],"rows":[{"_k":"a1","c1":"L1"}]}
  *
  * `cols` is a copy of the column labels at the time of editing — used only when
  * the template is not available (history view, regenerating an old report).

@@ -19,12 +19,11 @@
     }
   ],
   "rewrites": [
-    { "source": "/regulamin", "destination": "/regulamin.html" },
-    { "source": "/prywatnosc", "destination": "/prywatnosc.html" },
-    { "source": "/kontakt", "destination": "/kontakt.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/contact", "destination": "/contact.html" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/google05bcb868e7adc9d7.html", "destination": "/google05bcb868e7adc9d7.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

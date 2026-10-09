@@ -1,7 +1,7 @@
 import type { ReportHistoryItem } from "./storage";
 import { getCloudSnapshot } from "./supabase-storage";
 import { getAllTemplates, getTemplateById } from "./templates";
-import { formatDatePL } from "./report-utils";
+import { formatDateUS } from "./report-utils";
 
 /**
  * Prepares a new report based on an old one: finds its template and stores the
@@ -17,7 +17,7 @@ export async function prepareReuse(report: ReportHistoryItem): Promise<string | 
 
   sessionStorage.setItem("raporton_reuse", JSON.stringify({
     draft: { customFields: snapshot?.draft?.customFields || report.customFields },
-    label: `protokołu ${report.reportNumber ? `nr ${report.reportNumber} ` : ""}z ${formatDatePL(report.date)}`,
+    label: `report ${report.reportNumber ? `#${report.reportNumber} ` : ""}dated ${formatDateUS(report.date)}`,
   }));
   return `/report?template=${encodeURIComponent(templateId)}&reuse=1`;
 }

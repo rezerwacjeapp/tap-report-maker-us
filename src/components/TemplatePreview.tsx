@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, Fragment } from "react";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import type { CustomFieldDef, CompanyProfile, TextStyle } from "@/lib/storage";
 import { parseTable, tableColumns, filledRows } from "@/lib/table-field";
+import { isISODate, formatDateUS } from "@/lib/report-utils";
 
 /**
  * Live HTML mirror of the generated PDF.
@@ -21,8 +22,8 @@ const COLORS = {
   gray: "#6b7280",
 };
 
-// A4 width at ~96dpi. The whole page is scaled to fit its container.
-const PAGE_W = 794;
+// US Letter width (8.5 in) at 96 dpi. The whole page is scaled to fit its container.
+const PAGE_W = 816;
 
 const styleToCss = (s?: TextStyle): React.CSSProperties => {
   const css: React.CSSProperties = {};
@@ -52,7 +53,7 @@ export interface TemplatePreviewProps {
   additionalNotes?: string;
   /** show diagonal free-plan watermark */
   watermark?: boolean;
-  /** Etap 2 — click a field in the preview to jump to it in the form */
+  /** Click a field in the preview to jump to it in the form */
   onFieldClick?: (fieldId: string) => void;
 }
 
@@ -122,7 +123,7 @@ export function TemplatePreview({
     if (field.type === "heading") {
       return (
         <div key={field.id} style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "14px 0 6px", ...labelCss }}>
-          {field.label || (mode === "edit" ? "Nagłówek sekcji" : "")}
+          {field.label || (mode === "edit" ? "Section heading" : "")}
         </div>
       );
     }
@@ -136,7 +137,7 @@ export function TemplatePreview({
           )}
           {(field.content || mode === "edit") && (
             <div style={{ fontSize: 12, color: COLORS.gray, lineHeight: 1.5, ...contentCss }}>
-              {field.content || (mode === "edit" ? "Treść tekstu informacyjnego…" : "")}
+              {field.content || (mode === "edit" ? "Info text…" : "")}
             </div>
           )}
         </div>
@@ -150,9 +151,9 @@ export function TemplatePreview({
       if (isFill && !filled) return null; // PDF skips empty data fields
 
       const valueNode = filled ? (
-        <span style={{ fontSize: 13, color: COLORS.primary }}>{raw}</span>
+        <span style={{ fontSize: 13, color: COLORS.primary }}>{isISODate(raw.trim()) ? formatDateUS(raw.trim()) : raw}</span>
       ) : (
-        <span style={{ fontSize: 13, color: "#cbd5e1", fontStyle: "italic" }}>[{field.label || "wartość"}]</span>
+        <span style={{ fontSize: 13, color: "#cbd5e1", fontStyle: "italic" }}>[{field.label || "value"}]</span>
       );
 
       const rowProps = clickable
@@ -182,7 +183,7 @@ export function TemplatePreview({
       if (!cols.length) {
         return mode === "edit" ? (
           <div key={field.id} style={{ margin: "10px 0 12px", fontSize: 13, color: "#cbd5e1", fontStyle: "italic" }}>
-            {field.label || "Tabela"} - dodaj kolumny
+            {field.label || "Table"} - add columns
           </div>
         ) : null;
       }
@@ -202,7 +203,7 @@ export function TemplatePreview({
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: cols.length > 5 ? 11 : 12, border: "0.5px solid #d1d5db" }}>
             <thead>
               <tr style={{ background: COLORS.primary, color: COLORS.white }}>
-                <th style={{ width: 28, padding: "5px 4px", fontWeight: 700 }}>Lp.</th>
+                <th style={{ width: 28, padding: "5px 4px", fontWeight: 700 }}>#</th>
                 {cols.map((c) => (
                   <th key={c.id} style={{ padding: "5px 4px", fontWeight: 700, textAlign: c.kind === "number" ? "right" : "left" }}>{c.label}</th>
                 ))}
@@ -241,15 +242,15 @@ export function TemplatePreview({
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "0.5px solid #d1d5db" }}>
             <thead>
               <tr style={{ background: COLORS.primary, color: COLORS.white }}>
-                <th style={{ width: 36, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>Lp.</th>
-                <th style={{ padding: "5px 4px", textAlign: "left", fontWeight: 700, fontSize: 12 }}>Opis czynności</th>
+                <th style={{ width: 36, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>#</th>
+                <th style={{ padding: "5px 4px", textAlign: "left", fontWeight: 700, fontSize: 12 }}>Item</th>
                 <th style={{ width: 54, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {(field.tileOptions || []).map((tile, i) => {
                 const state = isFill ? (tileStates[tile.id] || "na") : "na";
-                const statusText = state === "done" ? "TAK" : state === "fail" ? "NIE" : "nd.";
+                const statusText = state === "done" ? "YES" : state === "fail" ? "NO" : "N/A";
                 const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
                 const note = isFill ? tileNotes[tile.id] : undefined;
                 return (
@@ -281,7 +282,7 @@ export function TemplatePreview({
       return (
         <div key={field.id} style={{ margin: "10px 0" }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>
-            {field.label || "Dokumentacja fotograficzna"}
+            {field.label || "Photos"}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {isFill
@@ -290,7 +291,7 @@ export function TemplatePreview({
                 ))
               : [0, 1].map((i) => (
                   <div key={i} style={{ height: 120, borderRadius: 4, border: "1px dashed #cbd5e1", background: COLORS.lightBg, display: "flex", alignItems: "center", justifyContent: "center", color: "#cbd5e1", fontSize: 12 }}>
-                    Zdjęcie
+                    Photo
                   </div>
                 ))}
           </div>
@@ -322,7 +323,7 @@ export function TemplatePreview({
   const profileFields = profile?.fields || [];
   const companyName = profileFields[0]?.value?.trim();
   const detailFields = profileFields.slice(1).filter((f) => f.value?.trim());
-  const reportNumLabel = reportNumber?.trim() || (mode === "edit" ? "Nr __/____" : "");
+  const reportNumLabel = reportNumber?.trim() || (mode === "edit" ? "No. __/____" : "");
 
   return (
     <div ref={wrapRef} className="relative w-full overflow-x-auto" onClick={handleTap}>
@@ -332,14 +333,14 @@ export function TemplatePreview({
           <button
             onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(0.5, +(z - 0.2).toFixed(2))); }}
             className="w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
-            aria-label="Pomniejsz"
+            aria-label="Zoom out"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(2.5, +(z + 0.2).toFixed(2))); }}
             className="w-8 h-8 rounded-full bg-card/90 border border-border shadow-sm flex items-center justify-center text-foreground hover:bg-card"
-            aria-label="Powiększ"
+            aria-label="Zoom in"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
@@ -370,7 +371,7 @@ export function TemplatePreview({
               <div style={{ transform: "rotate(-35deg)", fontSize: 64, fontWeight: 700, whiteSpace: "nowrap", opacity: 0.13, fontFamily: "Helvetica, Arial, sans-serif" }}>
                 <span style={{ color: COLORS.primary }}>Raport</span>
                 <span style={{ color: COLORS.accent }}>ON</span>
-                <span style={{ color: COLORS.primary }}>.pl</span>
+                <span style={{ color: COLORS.primary }}>.com</span>
               </div>
             </div>
           )}
@@ -380,7 +381,7 @@ export function TemplatePreview({
               {profile?.logo && <img src={profile.logo} alt="" style={{ maxHeight: 50, maxWidth: 120, objectFit: "contain" }} />}
               <div>
                 <div style={{ fontSize: 21, fontWeight: 700, color: companyName ? COLORS.primary : "#cbd5e1" }}>
-                  {companyName || "Nazwa firmy"}
+                  {companyName || "Company name"}
                 </div>
                 {detailFields.length > 0
                   ? detailFields.map((f) => (
@@ -389,7 +390,7 @@ export function TemplatePreview({
                       </div>
                     ))
                   : mode === "edit" && (
-                      <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.4 }}>NIP, adres, telefon…</div>
+                      <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.4 }}>Address, phone, license #…</div>
                     )}
               </div>
             </div>
@@ -400,14 +401,14 @@ export function TemplatePreview({
 
           {/* title row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-            <div style={{ fontSize: 19, fontWeight: 700, color: COLORS.primary }}>{pdfTitle || "TYTUŁ DOKUMENTU"}</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: COLORS.primary }}>{pdfTitle || "DOCUMENT TITLE"}</div>
             {reportNumLabel && <div style={{ fontSize: 12, color: COLORS.gray }}>{reportNumLabel}</div>}
           </div>
 
           {/* fields */}
           {fields.length === 0 ? (
             <div style={{ fontSize: 13, color: "#cbd5e1", fontStyle: "italic", padding: "24px 0" }}>
-              Dodaj pola - pojawią się tutaj na podglądzie.
+              Add fields - they will show up here in the preview.
             </div>
           ) : (
             fields.map((f, i) => renderField(f, i))
@@ -415,15 +416,15 @@ export function TemplatePreview({
 
           {isFill && additionalNotes?.trim() && (
             <div style={{ margin: "10px 0" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px" }}>Uwagi dodatkowe</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px" }}>Additional notes</div>
               <div style={{ fontSize: 13, color: COLORS.primary }}>{additionalNotes}</div>
             </div>
           )}
 
           {/* footer */}
           <div style={{ marginTop: 28, paddingTop: 8, borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", fontSize: 9, color: COLORS.gray }}>
-            <span>Wygenerowano: __.__.____ • {companyName || "RaportON"}</span>
-            <span>Strona 1 z 1</span>
+            <span>Generated: __/__/____ • {companyName || "RaportON"}</span>
+            <span>Page 1 of 1</span>
           </div>
           </div>
         </div>

@@ -57,7 +57,7 @@ function LoadingScreen() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-background">
       <div className="text-center space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent mx-auto" />
-        <p className="text-sm text-muted-foreground">Ładowanie...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ function AppShell() {
       .catch(() => setConsentChecked(true));
   }, [user]);
 
-  // "Wybierz Solo" from the landing page (/register?plan=solo): remember it until the user logs in
+  // "Choose Solo" from the landing page (/register?plan=solo): remember it until the user logs in
   useEffect(() => {
     if (!loading && !user && wantsSolo(location.search)) rememberSoloIntent();
   }, [loading, user, location.search]);
@@ -112,7 +112,7 @@ function AppShell() {
     if (takeSoloIntent()) navigate("/upgrade", { replace: true });
   }, [user, consentChecked, needsConsent, navigate]);
 
-  // Logged-in user opening /login or /register (e.g. "Wybierz Solo" on the landing page)
+  // Logged-in user opening /login or /register (e.g. "Choose Solo" on the landing page)
   const afterAuthPath = wantsSolo(location.search) ? "/upgrade" : "/";
 
   if (loading) return <LoadingScreen />;

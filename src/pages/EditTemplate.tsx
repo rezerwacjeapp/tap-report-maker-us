@@ -16,27 +16,27 @@ import { TemplatePreview } from "@/components/TemplatePreview";
 import { toast } from "sonner";
 
 const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
-  text: "Tekst", textarea: "Tekst długi", date: "Data", number: "Liczba",
-  tiles: "Czynności", photos: "Zdjęcia", signature: "Podpis",
-  heading: "Nagłówek", info: "Tekst stały", table: "Tabela",
+  text: "Text", textarea: "Long text", date: "Date", number: "Number",
+  tiles: "Checklist", photos: "Photos", signature: "Signature",
+  heading: "Heading", info: "Fixed text", table: "Table",
 };
 
 const FIELD_TYPE_HINTS: Record<CustomFieldType, string> = {
-  text: "Krótkie pole tekstowe - np. nazwa klienta, adres, numer seryjny.",
-  textarea: "Długie pole na opis - np. uwagi, zalecenia, stan techniczny.",
-  date: "Pole daty - np. data wykonania, data następnego przeglądu.",
-  number: "Pole liczbowe - np. powierzchnia, ilość, rok produkcji.",
-  tiles: "Sekcja z checkboxami do odhaczania - np. lista czynności serwisowych.",
-  photos: "Dokumentacja fotograficzna - osobne zdjęcia dla tej sekcji raportu.",
-  signature: "Pole na podpis palcem - np. podpis klienta, serwisanta, inspektora.",
-  heading: "Nagłówek sekcji - pogrubiony tekst dzielący raport na części.",
-  info: "Blok tekstu informacyjnego - np. podstawa prawna, uwagi, instrukcje.",
-  table: "Tabela z kolumnami - np. wyniki pomiarów per obwód, lista gaśnic, stany liczników.",
+  text: "Short text field - e.g. customer name, address, serial number.",
+  textarea: "Long text field - e.g. notes, recommendations, condition.",
+  date: "Date field - e.g. service date, next inspection date.",
+  number: "Number field - e.g. square footage, quantity, year built.",
+  tiles: "Checklist section - e.g. a list of service tasks to check off.",
+  photos: "Photos - a separate set of photos for this section of the report.",
+  signature: "Finger signature - e.g. customer, technician or inspector signature.",
+  heading: "Section heading - bold text that splits the report into parts.",
+  info: "Fixed text block - e.g. code references, disclaimers, instructions.",
+  table: "Table with columns - e.g. readings per circuit, extinguisher list, meter readings.",
 };
 
 
 /**
- * Whatever is still typed into an "add" panel when the user taps "Zapisz szablon".
+ * Whatever is still typed into an "add" panel when the user taps "Save template".
  * Saving must not silently drop e.g. a table that was built but never "added".
  */
 export function pendingStagedFields(p: {
@@ -53,16 +53,16 @@ export function pendingStagedFields(p: {
   const grid = cleanGrid(p.grid);
   const cols = dataColumnCount(grid);
   if (p.tableName.trim() || cols > 0) {
-    if (cols === 0) return { fields: [], error: `Tabela „${p.tableName.trim()}" nie ma nazwanej kolumny` };
+    if (cols === 0) return { fields: [], error: `Table "${p.tableName.trim()}" has no named column` };
     out.push({
-      id: id(), label: p.tableName.trim() || "Tabela", type: "table", remember: false, order: order++,
+      id: id(), label: p.tableName.trim() || "Table", type: "table", remember: false, order: order++,
       tableColumns: grid.tableColumns, ...(grid.tableRows.length ? { tableRows: grid.tableRows } : {}),
     });
   }
 
   const tiles = [...p.tiles, ...(p.tileInput.trim() ? [{ id: `to_${Date.now()}`, label: p.tileInput.trim() }] : [])];
   if (p.tilesName.trim() || tiles.length) {
-    out.push({ id: id(), label: p.tilesName.trim() || "Czynności", type: "tiles", remember: false, order: order++, tileOptions: tiles });
+    out.push({ id: id(), label: p.tilesName.trim() || "Checklist", type: "tiles", remember: false, order: order++, tileOptions: tiles });
   }
 
   // the simple / info / signature panels share one text input — only the open one counts
@@ -151,7 +151,7 @@ export default function EditTemplate() {
   useEffect(() => {
     const init = async () => {
       if (isNew) {
-        setTemplate(await createBlankTemplate("Nowy szablon"));
+        setTemplate(await createBlankTemplate("New template"));
       } else if (fromStarter) {
         const starter = STARTER_TEMPLATES.find((s) => s.id === fromStarter);
         if (starter) setTemplate(await duplicateTemplate(starter, starter.name));
@@ -312,7 +312,7 @@ export default function EditTemplate() {
   };
 
   const handleSave = async () => {
-    if (!template.name.trim()) { toast.error("Podaj nazwę szablonu"); return; }
+    if (!template.name.trim()) { toast.error("Enter a template name"); return; }
     const pending = pendingStagedFields({
       order: template.fields.length, openType: expandedAddType,
       tableName: stagingTableName, grid: stagingGrid,
@@ -325,11 +325,11 @@ export default function EditTemplate() {
       f.type === "table" ? { ...f, ...cleanGrid({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) } : f,
     );
     const emptyTable = fields.find((f) => f.type === "table" && dataColumnCount({ tableColumns: f.tableColumns || [], tableRows: f.tableRows || [] }) === 0);
-    if (emptyTable) { toast.error(`Tabela „${emptyTable.label || "bez nazwy"}" nie ma nazwanej kolumny`); return; }
+    if (emptyTable) { toast.error(`Table "${emptyTable.label || "untitled"}" has no named column`); return; }
     await saveUserTemplate({ ...template, fields });
     toast.success(pending.fields.length
-      ? `Szablon zapisany - dodano też: ${pending.fields.map((f) => f.label || FIELD_TYPE_LABELS[f.type]).join(", ")}`
-      : "Szablon zapisany!");
+      ? `Template saved - also added: ${pending.fields.map((f) => f.label || FIELD_TYPE_LABELS[f.type]).join(", ")}`
+      : "Template saved!");
     navigate("/select-template");
   };
 
@@ -351,17 +351,17 @@ export default function EditTemplate() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/select-template")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <span className="text-sm text-muted-foreground flex-1 truncate">Edytor szablonu</span>
+        <span className="text-sm text-muted-foreground flex-1 truncate">Template editor</span>
         {/* Mobile-only tab switch */}
         <div className="flex lg:hidden rounded-full bg-muted p-0.5">
           <button
             onClick={() => setMobileView("edit")}
             className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "edit" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
-          >Edytuj</button>
+          >Edit</button>
           <button
             onClick={() => setMobileView("preview")}
             className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
-          >Podgląd</button>
+          >Preview</button>
         </div>
       </div>
 
@@ -370,25 +370,25 @@ export default function EditTemplate() {
         <div className={`flex-col min-h-0 lg:w-[54%] lg:border-r lg:border-border ${mobileView === "preview" ? "hidden lg:flex" : "flex lg:flex"}`}>
           <header className="px-5 pt-4 pb-2 space-y-2 shrink-0">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Nazwa szablonu (widoczna tylko w aplikacji)</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Template name (shown only in the app)</label>
               <input
                 className="text-xl font-bold w-full h-12 rounded-xl border border-border bg-card px-4 focus:outline-none focus:border-accent transition-colors font-display"
                 value={template.name}
                 onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-                placeholder="np. Przegląd klimatyzacji"
+                placeholder="e.g. HVAC Maintenance"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Tytuł dokumentu (widoczny w nagłówku PDF)</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Document title (shown at the top of the PDF)</label>
               <input
                 className="w-full h-10 rounded-xl border border-border bg-card px-4 text-sm focus:outline-none focus:border-accent"
                 value={template.pdfTitle}
                 onChange={(e) => setTemplate({ ...template, pdfTitle: e.target.value })}
-                placeholder="np. PROTOKÓŁ PRZEGLĄDU KLIMATYZACJI"
+                placeholder="e.g. HVAC MAINTENANCE REPORT"
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-muted-foreground">Dane firmy w nagłówku PDF</label>
+              <label className="text-xs font-medium text-muted-foreground">Company info in the PDF header</label>
               <button onClick={() => setTemplate({ ...template, showCompanyHeader: !(template.showCompanyHeader !== false) })}>
                 {renderToggle(template.showCompanyHeader !== false)}
               </button>
@@ -396,11 +396,11 @@ export default function EditTemplate() {
           </header>
 
           <div className="px-5 py-1 text-xs text-muted-foreground shrink-0">
-            {dataFieldCount} pól • {tileOptionCount} czynności • {hasPhotosField ? "zdjęcia" : "bez zdjęć"} • {sigCount} podpisów
+            {dataFieldCount} fields • {tileOptionCount} checklist items • {hasPhotosField ? "photos" : "no photos"} • {sigCount} signatures
           </div>
 
           <main className="flex-1 px-5 pb-6 overflow-y-auto space-y-4 min-h-0">
-        <p className="text-xs text-muted-foreground">Włącz klocki lub dodaj własne. Strzałkami ↑↓ zmień kolejność - ta sama kolejność będzie w raporcie i PDF.</p>
+        <p className="text-xs text-muted-foreground">Turn on building blocks or add your own. Use the ↑↓ arrows to reorder - the form and the PDF follow the same order.</p>
 
         {getFieldCategories().map((cat) => {
           const blocks = FIELD_CATALOG.filter((b) => b.category === cat);
@@ -431,20 +431,20 @@ export default function EditTemplate() {
 
         {/* === ADD FIELD — type-first approach === */}
         <div className="rounded-xl border border-dashed border-border p-4 space-y-3">
-          <p className="text-sm font-semibold">Dodaj pole do raportu</p>
-          <p className="text-[11px] text-muted-foreground">Wybierz typ pola, a następnie wpisz jego nazwę.</p>
+          <p className="text-sm font-semibold">Add a field to the report</p>
+          <p className="text-[11px] text-muted-foreground">Pick a field type, then type its name.</p>
 
           {/* Type cards grid */}
           <div className="grid grid-cols-3 gap-2">
             {([
-              { type: "text" as CustomFieldType, icon: Type, label: "Tekst", hint: "np. nazwa, NIP, adres" },
-              { type: "textarea" as CustomFieldType, icon: AlignLeft, label: "Tekst długi", hint: "np. uwagi, opis" },
-              { type: "date" as CustomFieldType, icon: Calendar, label: "Data", hint: "np. data wykonania" },
-              { type: "number" as CustomFieldType, icon: Hash, label: "Liczba", hint: "np. ilość, powierzchnia" },
-              { type: "photos" as CustomFieldType, icon: Camera, label: "Zdjęcia", hint: "dokumentacja foto" },
-              { type: "signature" as CustomFieldType, icon: PenTool, label: "Podpis", hint: "podpis palcem" },
-              { type: "heading" as CustomFieldType, icon: Heading1, label: "Nagłówek", hint: "tytuł sekcji" },
-              { type: "info" as CustomFieldType, icon: FileText, label: "Tekst stały", hint: "opis, uwagi prawne" },
+              { type: "text" as CustomFieldType, icon: Type, label: "Text", hint: "e.g. name, address" },
+              { type: "textarea" as CustomFieldType, icon: AlignLeft, label: "Long text", hint: "e.g. notes, description" },
+              { type: "date" as CustomFieldType, icon: Calendar, label: "Date", hint: "e.g. service date" },
+              { type: "number" as CustomFieldType, icon: Hash, label: "Number", hint: "e.g. quantity, sq ft" },
+              { type: "photos" as CustomFieldType, icon: Camera, label: "Photos", hint: "photo documentation" },
+              { type: "signature" as CustomFieldType, icon: PenTool, label: "Signature", hint: "finger signature" },
+              { type: "heading" as CustomFieldType, icon: Heading1, label: "Heading", hint: "section title" },
+              { type: "info" as CustomFieldType, icon: FileText, label: "Fixed text", hint: "description, disclaimers" },
             ]).map(({ type, icon: Icon, label, hint }) => (
               <button
                 key={type}
@@ -467,7 +467,7 @@ export default function EditTemplate() {
             ))}
           </div>
 
-          {/* Czynności card — separate, wider */}
+          {/* Checklist card — separate, wider */}
           <button
             onClick={() => {
               if (expandedAddType === "tiles") {
@@ -480,27 +480,27 @@ export default function EditTemplate() {
           >
             <ListChecks className={`h-5 w-5 shrink-0 ${expandedAddType === "tiles" ? "text-accent" : "text-muted-foreground"}`} />
             <div>
-              <span className="text-xs font-medium">Czynności (checkboxy)</span>
-              <span className="text-[10px] text-muted-foreground block">Sekcja z listą czynności do odhaczania</span>
+              <span className="text-xs font-medium">Checklist</span>
+              <span className="text-[10px] text-muted-foreground block">A section with items to check off</span>
             </div>
           </button>
 
-          {/* Tabela card */}
+          {/* Table card */}
           <button
             onClick={() => setExpandedAddType(expandedAddType === "table" ? null : "table")}
             className={`w-full rounded-xl border p-2.5 text-left transition-all flex items-center gap-3 ${expandedAddType === "table" ? "border-accent bg-accent/5" : "border-border bg-card hover:border-accent/40"}`}
           >
             <Table2 className={`h-5 w-5 shrink-0 ${expandedAddType === "table" ? "text-accent" : "text-muted-foreground"}`} />
             <div>
-              <span className="text-xs font-medium">Tabela</span>
-              <span className="text-[10px] text-muted-foreground block">Kolumny ustalasz tu, wiersze dodajesz w terenie - np. pomiary per obwód</span>
+              <span className="text-xs font-medium">Table</span>
+              <span className="text-[10px] text-muted-foreground block">Set the columns here, add rows on site - e.g. readings per circuit</span>
             </div>
           </button>
 
           {/* === Expanded panel for simple types === */}
           {expandedAddType && !["signature", "tiles", "info", "table"].includes(expandedAddType) && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Wpisz {expandedAddType === "heading" ? "treść nagłówka" : `nazwę pola typu`} <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>:</p>
+              <p className="text-xs text-muted-foreground">{expandedAddType === "heading" ? "Type the heading text" : "Type a name for the"} <span className="font-medium text-foreground">{FIELD_TYPE_LABELS[expandedAddType]}</span>{expandedAddType === "heading" ? "" : " field"}:</p>
               <div className="flex gap-1.5">
                 <input
                   ref={addFieldInputRef}
@@ -508,10 +508,10 @@ export default function EditTemplate() {
                   value={newFieldLabel}
                   onChange={(e) => setNewFieldLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField(expandedAddType); }}
-                  placeholder={expandedAddType === "heading" ? "np. Podstawa prawna" : FIELD_TYPE_HINTS[expandedAddType]}
+                  placeholder={expandedAddType === "heading" ? "e.g. Equipment details" : FIELD_TYPE_HINTS[expandedAddType]}
                 />
                 <Button variant="accent" onClick={() => addCustomField(expandedAddType)} disabled={!newFieldLabel.trim()} className="h-10 px-4 shrink-0">
-                  <Plus className="h-4 w-4 mr-1" /> Dodaj
+                  <Plus className="h-4 w-4 mr-1" /> Add
                 </Button>
               </div>
             </div>
@@ -520,19 +520,19 @@ export default function EditTemplate() {
           {/* === Expanded panel for INFO (static text block) === */}
           {expandedAddType === "info" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Wpisz treść tekstu informacyjnego (nazwa sekcji jest opcjonalna):</p>
+              <p className="text-xs text-muted-foreground">Type the fixed text (the section name is optional):</p>
               <input
                 ref={addFieldInputRef}
                 className="w-full h-10 rounded-xl border border-border bg-card px-3 text-sm focus:outline-none focus:border-accent"
                 value={newFieldLabel}
                 onChange={(e) => setNewFieldLabel(e.target.value)}
-                placeholder="Nazwa sekcji (opcjonalnie)"
+                placeholder="Section name (optional)"
               />
               <textarea
                 className="w-full min-h-[100px] rounded-xl border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:border-accent resize-y"
                 value={stagingInfoContent}
                 onChange={(e) => setStagingInfoContent(e.target.value)}
-                placeholder="Treść tekstu - np. Kontrolę należy wykonywać w porze wiosennej..."
+                placeholder="Text - e.g. This inspection should be performed annually..."
               />
               <Button variant="accent" onClick={() => {
                 if (!newFieldLabel.trim() && !stagingInfoContent.trim()) return;
@@ -549,7 +549,7 @@ export default function EditTemplate() {
                 setStagingInfoContent("");
                 setExpandedAddType(null);
               }} disabled={!newFieldLabel.trim() && !stagingInfoContent.trim()} className="w-full">
-                <Plus className="h-4 w-4 mr-1" /> Dodaj tekst stały
+                <Plus className="h-4 w-4 mr-1" /> Add fixed text
               </Button>
             </div>
           )}
@@ -557,13 +557,13 @@ export default function EditTemplate() {
           {/* === Expanded panel for SIGNATURE === */}
           {expandedAddType === "signature" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Kliknij gotowy podpis lub wpisz własną nazwę:</p>
+              <p className="text-xs text-muted-foreground">Tap a ready-made signature or type your own name for it:</p>
               <div className="flex flex-wrap gap-2">
-                {["Podpis klienta", "Podpis serwisanta", "Podpis inspektora", "Podpis kierownika"].map((label) => (
+                {["Customer signature", "Technician signature", "Inspector signature", "Supervisor signature"].map((label) => (
                   <button key={label} onClick={() => {
                     const f: CustomFieldDef = { id: `cf_${Date.now()}`, label, type: "signature", remember: false, order: template.fields.length };
                     setTemplate({ ...template, fields: [...template.fields, f] });
-                    toast.success(`Dodano: ${label}`);
+                    toast.success(`Added: ${label}`);
                   }} className="rounded-md border border-accent/30 bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/10 transition-all">
                     {label}
                   </button>
@@ -573,7 +573,7 @@ export default function EditTemplate() {
                 <input
                   ref={addFieldInputRef}
                   className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
-                  placeholder="Inna nazwa - np. Podpis świadka"
+                  placeholder="Other - e.g. Witness signature"
                   value={newFieldLabel}
                   onChange={(e) => setNewFieldLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newFieldLabel.trim()) addCustomField("signature"); }}
@@ -586,24 +586,24 @@ export default function EditTemplate() {
           {/* === Expanded panel for TABLE === */}
           {expandedAddType === "table" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2.5">
-              <input className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:border-accent" placeholder="Nazwa tabeli - np. Stany liczników" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
+              <input className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:border-accent" placeholder="Table name - e.g. Meter readings" value={stagingTableName} onChange={(e) => setStagingTableName(e.target.value)} />
               <TableGridBuilder columns={stagingGrid.tableColumns} rows={stagingGrid.tableRows} onChange={setStagingGrid} />
               <Button variant="accent" size="sm" onClick={commitTableSection} className="w-full" disabled={!canAddTable}>
-                <Plus className="h-4 w-4 mr-1" /> Dodaj tabelę
+                <Plus className="h-4 w-4 mr-1" /> Add table
               </Button>
               {!canAddTable && (
                 <p className="text-[11px] text-muted-foreground text-center -mt-1">
-                  {!stagingTableName.trim() ? "Wpisz nazwę tabeli" : "Nazwij przynajmniej jedną kolumnę"}
+                  {!stagingTableName.trim() ? "Type a table name" : "Name at least one column"}
                 </p>
               )}
             </div>
           )}
 
-          {/* === Expanded panel for TILES/CZYNNOŚCI === */}
+          {/* === Expanded panel for TILES (checklist) === */}
           {expandedAddType === "tiles" && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
-              <p className="text-xs text-muted-foreground">Nazwij sekcję, dodaj czynności i kliknij „Dodaj do raportu".</p>
-              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa sekcji - np. Czynności serwisowe" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
+              <p className="text-xs text-muted-foreground">Name the section, add items and tap "Add to report".</p>
+              <input className="w-full h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Section name - e.g. Service checklist" value={stagingTilesName} onChange={(e) => setStagingTilesName(e.target.value)} />
 
               {stagingTiles.length > 0 && (
                 <div className="space-y-1 border-l-2 border-accent/30 pl-3 ml-1">
@@ -618,13 +618,13 @@ export default function EditTemplate() {
               )}
 
               <div className="flex gap-1.5">
-                <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Nazwa czynności - np. Czyszczenie filtrów" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
+                <input className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent" placeholder="Item - e.g. Replace air filter" value={stagingTileInput} onChange={(e) => setStagingTileInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") addStagingTile(); }} />
                 <Button variant="outline" size="icon" onClick={addStagingTile} className="h-9 w-9 shrink-0"><Plus className="h-4 w-4" /></Button>
               </div>
 
               <Button variant="accent" size="sm" onClick={() => { commitTilesSection(); setExpandedAddType(null); }} className="w-full" disabled={!stagingTilesName.trim()}>
-                <Plus className="h-4 w-4 mr-1" /> Dodaj do raportu {stagingTiles.length > 0 && `(${stagingTiles.length} czynności)`}
+                <Plus className="h-4 w-4 mr-1" /> Add to report {stagingTiles.length > 0 && `(${stagingTiles.length} ${stagingTiles.length === 1 ? "item" : "items"})`}
               </Button>
             </div>
           )}
@@ -633,7 +633,7 @@ export default function EditTemplate() {
         {/* Current fields — draggable with up/down */}
         {template.fields.length > 0 && (
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Kolejność pól w raporcie ({template.fields.length})</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Field order in the report ({template.fields.length})</p>
             {template.fields.map((field, index) => (
               <div key={field.id}>
                 <div draggable onDragStart={() => handleDragStart(index)} onDragEnter={() => handleDragEnter(index)} onDragEnd={handleFieldDragEnd} onDragOver={(e) => e.preventDefault()}
@@ -645,27 +645,27 @@ export default function EditTemplate() {
                   </div>
                   {/* Editable label for signature fields */}
                   {field.type === "signature" ? (
-                    <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Nazwa podpisu" />
+                    <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Signature name" />
                   ) : field.type === "heading" ? (
-                    <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none font-bold" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Treść nagłówka" />
+                    <input className="text-sm flex-1 min-w-0 bg-transparent border-none outline-none font-bold" value={field.label} onChange={(e) => updateFieldLabel(field.id, e.target.value)} placeholder="Heading text" />
                   ) : (
                     <span className="text-sm flex-1 truncate">{field.label || (field.type === "info" && field.content ? field.content.substring(0, 60) + (field.content.length > 60 ? "…" : "") : field.label)}</span>
                   )}
-                  <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : field.type === "table" ? ` (${(field.tableColumns || []).length} kol.)` : ""}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{FIELD_TYPE_LABELS[field.type]}{field.type === "tiles" ? ` (${(field.tileOptions || []).length})` : field.type === "table" ? ` (${(field.tableColumns || []).length} col.)` : ""}</span>
                   <button onClick={() => removeField(field.id)} className="text-muted-foreground hover:text-destructive shrink-0"><X className="h-4 w-4" /></button>
                 </div>
 
                 {/* Style toolbar for label */}
                 {!["photos"].includes(field.type) && (
                   <div className="ml-6 mt-1 mb-1 flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">{field.type === "info" ? "Nazwa:" : "Styl:"}</span>
+                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">{field.type === "info" ? "Title:" : "Style:"}</span>
                     <StyleToolbar field={field} styleKey="labelStyle" />
                   </div>
                 )}
                 {/* Style toolbar for info content */}
                 {field.type === "info" && (
                   <div className="ml-6 mb-1 flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">Treść:</span>
+                    <span className="text-[10px] text-muted-foreground w-12 shrink-0">Text:</span>
                     <StyleToolbar field={field} styleKey="contentStyle" />
                   </div>
                 )}
@@ -674,7 +674,7 @@ export default function EditTemplate() {
                 {field.type === "tiles" && (
                   <div className="ml-6 mt-1 mb-2 space-y-1.5 border-l-2 border-accent/30 pl-3">
                     {(field.tileOptions || []).length === 0 && (
-                      <p className="text-xs text-muted-foreground py-1">Brak czynności - dodaj poniżej.</p>
+                      <p className="text-xs text-muted-foreground py-1">No items yet - add them below.</p>
                     )}
                     {(field.tileOptions || []).map((tile) => (
                       <div key={tile.id} className="flex items-center gap-2 text-sm">
@@ -686,7 +686,7 @@ export default function EditTemplate() {
                     <div className="flex gap-1.5">
                       <input
                         className="flex-1 h-9 rounded-md border border-border bg-card px-3 text-xs focus:outline-none focus:border-accent"
-                        placeholder="Nazwa czynności"
+                        placeholder="Checklist item"
                         value={newTileOptionLabel[field.id] || ""}
                         onChange={(e) => setNewTileOptionLabel({ ...newTileOptionLabel, [field.id]: e.target.value })}
                         onKeyDown={(e) => e.key === "Enter" && addTileOption(field.id)}
@@ -703,7 +703,7 @@ export default function EditTemplate() {
                       className="w-full h-8 rounded-md border border-border bg-card px-2.5 text-xs font-medium focus:outline-none focus:border-accent"
                       value={field.label}
                       onChange={(e) => updateFieldLabel(field.id, e.target.value)}
-                      placeholder="Nazwa tabeli"
+                      placeholder="Table name"
                     />
                     <TableGridBuilder
                       columns={field.tableColumns || []}
@@ -720,7 +720,7 @@ export default function EditTemplate() {
                       className="w-full min-h-[60px] rounded-md border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-accent resize-y"
                       value={field.content || ""}
                       onChange={(e) => setTemplate({ ...template, fields: template.fields.map((f) => f.id === field.id ? { ...f, content: e.target.value } : f) })}
-                      placeholder="Treść tekstu informacyjnego..."
+                      placeholder="Fixed text..."
                     />
                   </div>
                 )}
@@ -732,7 +732,7 @@ export default function EditTemplate() {
 
           <div className="bg-background border-t border-border px-5 py-4 shrink-0 sticky bottom-0 lg:static">
             <Button variant="accent" size="lg" className="w-full" onClick={handleSave}>
-              <Save className="h-5 w-5 mr-2" /> Zapisz szablon
+              <Save className="h-5 w-5 mr-2" /> Save template
             </Button>
           </div>
         </div>

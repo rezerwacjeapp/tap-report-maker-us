@@ -39,11 +39,11 @@ export interface TextStyle {
 }
 
 export const STYLE_COLORS = [
-  { id: "default", label: "Domyślny", hex: "#1e293b" },
-  { id: "gray", label: "Szary", hex: "#6b7280" },
-  { id: "blue", label: "Niebieski", hex: "#2563eb" },
-  { id: "orange", label: "Pomarańczowy", hex: "#ea580c" },
-  { id: "red", label: "Czerwony", hex: "#dc2626" },
+  { id: "default", label: "Default", hex: "#1e293b" },
+  { id: "gray", label: "Gray", hex: "#6b7280" },
+  { id: "blue", label: "Blue", hex: "#2563eb" },
+  { id: "orange", label: "Orange", hex: "#ea580c" },
+  { id: "red", label: "Red", hex: "#dc2626" },
 ];
 
 export interface CustomFieldDef {
@@ -125,10 +125,12 @@ function set(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-const DEFAULT_PROFILE_FIELDS: ProfileField[] = [
-  { id: "pf_name", label: "Nazwa firmy", value: "" },
-  { id: "pf_nip", label: "NIP", value: "" },
-  { id: "pf_address", label: "Adres", value: "" },
+/** Company header fields a new account starts with (first one = big company name on the PDF). */
+export const DEFAULT_PROFILE_FIELDS: ProfileField[] = [
+  { id: "pf_name", label: "Company name", value: "" },
+  { id: "pf_address", label: "Address", value: "" },
+  { id: "pf_phone", label: "Phone", value: "" },
+  { id: "pf_license", label: "License #", value: "" },
 ];
 
 export function getProfile(): CompanyProfile {
@@ -137,9 +139,8 @@ export function getProfile(): CompanyProfile {
   // Migration from old format (companyName/nip/address) to fields[]
   if (!raw.fields) {
     const fields: ProfileField[] = [
-      { id: "pf_name", label: "Nazwa firmy", value: raw.companyName || "" },
-      { id: "pf_nip", label: "NIP", value: raw.nip || "" },
-      { id: "pf_address", label: "Adres", value: raw.address || "" },
+      { id: "pf_name", label: "Company name", value: raw.companyName || "" },
+      { id: "pf_address", label: "Address", value: raw.address || "" },
     ];
     const migrated: CompanyProfile = { logo: raw.logo || null, fields };
     set(KEYS.PROFILE, migrated);

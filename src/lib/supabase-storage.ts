@@ -4,7 +4,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { CompanyProfile, ReportHistoryItem } from "./storage";
+import { DEFAULT_PROFILE_FIELDS, type CompanyProfile, type ReportHistoryItem } from "./storage";
 import type { GeneratedReport } from "./pdf-generator";
 
 // ─── PROFILE ────────────────────────────────────────────────
@@ -20,22 +20,14 @@ export async function getCloudProfile(): Promise<CompanyProfile> {
     .single();
 
   if (error || !data) {
-    return { logo: null, fields: [
-      { id: "pf_name", label: "Nazwa firmy", value: "" },
-      { id: "pf_nip", label: "NIP", value: "" },
-      { id: "pf_address", label: "Adres", value: "" },
-    ]};
+    return { logo: null, fields: DEFAULT_PROFILE_FIELDS.map((f) => ({ ...f })) };
   }
 
   const cf = data.custom_fields as any;
   if (cf && cf.fields) {
     return { logo: cf.logo || null, fields: cf.fields };
   }
-  return { logo: null, fields: [
-    { id: "pf_name", label: "Nazwa firmy", value: "" },
-    { id: "pf_nip", label: "NIP", value: "" },
-    { id: "pf_address", label: "Adres", value: "" },
-  ]};
+  return { logo: null, fields: DEFAULT_PROFILE_FIELDS.map((f) => ({ ...f })) };
 }
 
 export async function saveCloudProfile(profile: CompanyProfile): Promise<void> {
@@ -411,33 +403,12 @@ export async function incrementReportCount(): Promise<void> {
 
   const month = new Date().toISOString().slice(0, 7);
 
-  // Try atomic RPC first (requires running the SQL migration in Supabase)
-  const { error: rpcError } = await supabase.rpc("increment_report_count", {
+  // Atomic increment in the database. report_counts is read-only for users (RLS),
+  // so this function is the only way to change it.
+  await supabase.rpc("increment_report_count", {
     p_user_id: user.id,
     p_month: month,
   });
-
-  if (!rpcError) return; // Success — atomic increment done
-
-  // Fallback: non-atomic (for backward compatibility before migration)
-  const { data: existing } = await supabase
-    .from("report_counts")
-    .select("count")
-    .eq("user_id", user.id)
-    .eq("month", month)
-    .maybeSingle();
-
-  if (existing) {
-    await supabase
-      .from("report_counts")
-      .update({ count: existing.count + 1 })
-      .eq("user_id", user.id)
-      .eq("month", month);
-  } else {
-    await supabase
-      .from("report_counts")
-      .insert({ user_id: user.id, month, count: 1 });
-  }
 }
 
 // ─── REPORT NUMBER ──────────────────────────────────────────

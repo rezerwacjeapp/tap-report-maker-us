@@ -21,7 +21,7 @@ export function VoiceButton({ onResult }: Props) {
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.lang = "pl-PL";
+    recognition.lang = "en-US";
     recognition.continuous = true;
     recognition.interimResults = false;
 
@@ -57,7 +57,7 @@ export function VoiceButton({ onResult }: Props) {
       className="w-full"
     >
       {listening ? <MicOff className="h-5 w-5 mr-1" /> : <Mic className="h-5 w-5 mr-1" />}
-      {listening ? "Zatrzymaj dyktowanie" : "Dyktuj notatkę"}
+      {listening ? "Stop dictation" : "Dictate a note"}
     </Button>
   );
 }

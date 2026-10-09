@@ -44,9 +44,9 @@ export default function ImportTemplate() {
       };
       await saveUserTemplate(imported);
       setDone(true);
-      toast.success("Szablon zaimportowany!");
+      toast.success("Template imported!");
     } catch {
-      toast.error("Nie udało się zaimportować szablonu");
+      toast.error("Could not import the template");
     } finally {
       setImporting(false);
     }
@@ -67,15 +67,15 @@ export default function ImportTemplate() {
           <div className="h-16 w-16 mx-auto rounded-2xl bg-muted flex items-center justify-center">
             <FileText className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h1 className="text-xl font-bold">Szablon nie znaleziony</h1>
+          <h1 className="text-xl font-bold">Template not found</h1>
           <p className="text-sm text-muted-foreground">
-            Link jest nieprawidłowy lub szablon został usunięty.
+            The link is invalid or the template was deleted.
           </p>
           <button
             onClick={() => navigate("/")}
             className="h-11 px-6 rounded-xl bg-accent text-white font-medium active:scale-[0.98] transition-transform"
           >
-            Strona główna
+            Home
           </button>
         </div>
       </div>
@@ -89,15 +89,15 @@ export default function ImportTemplate() {
           <div className="h-16 w-16 mx-auto rounded-2xl bg-accent/10 flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-accent" />
           </div>
-          <h1 className="text-xl font-bold">Gotowe!</h1>
+          <h1 className="text-xl font-bold">Done!</h1>
           <p className="text-sm text-muted-foreground">
-            Szablon <strong>{templateName}</strong> został dodany do Twoich szablonów.
+            <strong>{templateName}</strong> was added to your templates.
           </p>
           <button
             onClick={() => navigate("/select-template")}
             className="h-11 px-6 rounded-xl bg-accent text-white font-medium active:scale-[0.98] transition-transform"
           >
-            Przejdź do szablonów
+            Go to templates
           </button>
         </div>
       </div>
@@ -113,9 +113,9 @@ export default function ImportTemplate() {
             <FileText className="h-8 w-8 text-accent" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-xl font-bold">Szablon: {templateName}</h1>
+            <h1 className="text-xl font-bold">Template: {templateName}</h1>
             <p className="text-sm text-muted-foreground">
-              Zaloguj się lub utwórz konto, żeby zaimportować ten szablon do swojej aplikacji.
+              Sign in or create an account to import this template into your app.
             </p>
           </div>
           <div className="space-y-3">
@@ -124,14 +124,14 @@ export default function ImportTemplate() {
               onClick={() => localStorage.setItem("raporton_pending_import", code!)}
               className="block h-11 rounded-xl bg-accent text-white font-medium leading-[2.75rem] text-center active:scale-[0.98] transition-transform"
             >
-              Zaloguj się
+              Sign in
             </Link>
             <Link
               to="/register"
               onClick={() => localStorage.setItem("raporton_pending_import", code!)}
               className="block h-11 rounded-xl border border-border text-foreground font-medium leading-[2.75rem] text-center active:scale-[0.98] transition-transform"
             >
-              Utwórz konto
+              Create account
             </Link>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function ImportTemplate() {
         <div className="space-y-1">
           <h1 className="text-xl font-bold">{templateName}</h1>
           <p className="text-sm text-muted-foreground">
-            {fieldCount} pól • {tileCount} czynności • {sigCount} {sigCount === 1 ? "podpis" : "podpisy"}
+            {fieldCount} fields • {tileCount} checklist items • {sigCount} {sigCount === 1 ? "signature" : "signatures"}
           </p>
         </div>
         <button
@@ -161,13 +161,13 @@ export default function ImportTemplate() {
           disabled={importing}
           className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
         >
-          {importing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Importuj szablon"}
+          {importing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Import template"}
         </button>
         <button
           onClick={() => navigate("/")}
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          Anuluj
+          Cancel
         </button>
       </div>
     </div>

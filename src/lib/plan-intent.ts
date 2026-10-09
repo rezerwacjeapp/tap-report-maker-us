@@ -1,7 +1,7 @@
 /**
- * „Wybierz Solo" na landingu prowadzi do /register?plan=solo. Wybór pamiętamy do
- * zalogowania (także po kliknięciu linku z maila i logowaniu przez Google), a potem
- * otwieramy stronę zakupu /upgrade.
+ * "Choose Solo" on the landing page leads to /register?plan=solo. We remember the
+ * choice until the user is signed in (also after the email link and Google sign-in),
+ * then open the purchase page /upgrade.
  */
 const KEY = "raporton_pending_plan";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 h
@@ -14,7 +14,7 @@ export function rememberSoloIntent(now = Date.now()): void {
   try {
     localStorage.setItem(KEY, String(now));
   } catch {
-    /* brak dostępu do localStorage - po zalogowaniu zostaje przycisk na Starcie */
+    /* no localStorage - after sign-in the upgrade button on Home is still there */
   }
 }
 
@@ -27,13 +27,13 @@ export function hasSoloIntent(now = Date.now()): boolean {
   }
 }
 
-/** Zwraca true, jeśli był świeży wybór Solo, i kasuje go, żeby przekierować tylko raz. */
+/** True if there was a fresh Solo choice; clears it so we redirect only once. */
 export function takeSoloIntent(now = Date.now()): boolean {
   const fresh = hasSoloIntent(now);
   try {
     localStorage.removeItem(KEY);
   } catch {
-    /* ignoruj */
+    /* ignore */
   }
   return fresh;
 }

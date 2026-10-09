@@ -16,16 +16,15 @@ interface Props {
   onChange: (raw: string) => void;
 }
 
-const rowsWord = (n: number) =>
-  n === 1 ? "wiersz" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "wiersze" : "wierszy";
+const rowsWord = (n: number) => (n === 1 ? "row" : "rows");
 
 const FIRST_COL = 156; // px — sticky first column (row number + name)
 const COL = 124; // px — other columns
 
 /**
- * "Tabela" in the report: the same grid the template author built. Scroll sideways,
- * tap a cell and type. "Dalej" on the keyboard jumps to the next cell, so a whole
- * row goes in without closing the keyboard. Row number → Powiel / Usuń.
+ * "Table" in the report: the same grid the template author built. Scroll sideways,
+ * tap a cell and type. "Next" on the keyboard jumps to the next cell, so a whole
+ * row goes in without closing the keyboard. Row number → Duplicate / Delete.
  */
 export function TableFieldInput({ field, value, onChange }: Props) {
   const parsed = useMemo(() => parseTable(value) ?? parseTable(initialTableValue(field)), [value, field]);
@@ -71,13 +70,13 @@ export function TableFieldInput({ field, value, onChange }: Props) {
     const removed = rows[index];
     const next = rows.filter((_, i) => i !== index);
     commit(next.length ? next : [{ _k: newRowKey() }]);
-    toast("Usunięto wiersz", {
-      action: { label: "Cofnij", onClick: () => commit([...next.slice(0, index), removed, ...next.slice(index)]) },
+    toast("Row deleted", {
+      action: { label: "Undo", onClick: () => commit([...next.slice(0, index), removed, ...next.slice(index)]) },
     });
   };
 
   if (!cols.length) {
-    return <p className="text-xs text-muted-foreground">Ta tabela nie ma jeszcze kolumn - dodaj je w edytorze szablonu.</p>;
+    return <p className="text-xs text-muted-foreground">This table has no columns yet - add them in the template editor.</p>;
   }
 
   const cellBase = "block w-full min-h-11 bg-transparent px-2.5 text-[15px] focus:outline-none focus:bg-accent/5 focus:ring-2 focus:ring-inset focus:ring-accent rounded-none";
@@ -85,7 +84,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
   return (
     <div className="space-y-2">
       <p className="text-xs text-muted-foreground pr-7">
-        {filledCount > 0 ? `${filledCount} ${rowsWord(filledCount)} w PDF` : "Dotknij komórki, żeby wpisać. Puste wiersze nie trafią do PDF."}
+        {filledCount > 0 ? `${filledCount} ${rowsWord(filledCount)} in the PDF` : "Tap a cell to type. Empty rows are left out of the PDF."}
       </p>
 
       <div ref={gridRef} className="overflow-x-auto rounded-xl border border-border bg-card" style={{ scrollPaddingLeft: FIRST_COL }}>
@@ -101,7 +100,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                   scope="col"
                   className={`px-2.5 py-2 text-[11px] font-semibold text-muted-foreground align-bottom border-b border-border break-words ${ci === 0 ? "sticky left-0 z-10 bg-muted text-left border-r" : `${c.kind === "number" ? "text-right" : "text-left"} border-r last:border-r-0`}`}
                 >
-                  {ci === 0 ? <span className="pl-8 block">{c.label || (hasFixedRows ? "" : "Kolumna 1")}</span> : c.label || `Kolumna ${ci + 1}`}
+                  {ci === 0 ? <span className="pl-8 block">{c.label || (hasFixedRows ? "" : "Column 1")}</span> : c.label || `Column ${ci + 1}`}
                 </th>
               ))}
             </tr>
@@ -112,7 +111,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                 {cols.map((c, ci) => {
                   const v = row[c.id] ?? "";
                   const cellKey = `${row._k}:${ci}`;
-                  const label = `${c.label || `Kolumna ${ci + 1}`}, wiersz ${ri + 1}`;
+                  const label = `${c.label || `Column ${ci + 1}`}, row ${ri + 1}`;
                   const isLast = ri === rows.length - 1 && ci === cols.length - 1;
 
                   const input = c.kind === "choice" && c.options?.length ? (
@@ -146,7 +145,7 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                       data-cell={cellKey}
                       role="button"
                       tabIndex={0}
-                      aria-label={v ? `${label}: ${v}` : `${label}: puste`}
+                      aria-label={v ? `${label}: ${v}` : `${label}: empty`}
                       onClick={() => setActive(cellKey)}
                       onFocus={() => setActive(cellKey)}
                       className={`${cellBase} py-2.5 leading-snug whitespace-pre-wrap break-words cursor-text ${c.kind === "number" ? "text-right tabular-nums" : ""} ${ci === 0 ? "font-semibold pl-1" : ""}`}
@@ -166,14 +165,14 @@ export function TableFieldInput({ field, value, onChange }: Props) {
                             <button
                               type="button"
                               className="ml-1.5 shrink-0 h-7 min-w-[1.75rem] px-1 rounded-md bg-muted text-[11px] font-bold text-muted-foreground hover:text-foreground"
-                              aria-label={`Wiersz ${ri + 1} - opcje`}
+                              aria-label={`Row ${ri + 1} - options`}
                             >
                               {ri + 1}
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start">
-                            <DropdownMenuItem onSelect={() => duplicateRow(ri)}><Copy className="h-4 w-4 mr-2" /> Powiel wiersz</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => removeRow(ri)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Usuń wiersz</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => duplicateRow(ri)}><Copy className="h-4 w-4 mr-2" /> Duplicate row</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => removeRow(ri)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Delete row</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                         <div className="flex-1 min-w-0">{input}</div>
@@ -192,10 +191,10 @@ export function TableFieldInput({ field, value, onChange }: Props) {
         onClick={addRow}
         className="w-full h-11 rounded-xl border border-dashed border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent/50 flex items-center justify-center gap-2 transition-colors"
       >
-        <Plus className="h-4 w-4" /> Dodaj wiersz
+        <Plus className="h-4 w-4" /> Add row
       </button>
       {rows.length > 0 && cols.length > 2 && (
-        <p className="text-[11px] text-muted-foreground">Przesuń tabelę w bok, żeby zobaczyć kolejne kolumny. Numer wiersza → powiel albo usuń.</p>
+        <p className="text-[11px] text-muted-foreground">Swipe the table sideways to see more columns. Tap a row number to duplicate or delete it.</p>
       )}
     </div>
   );

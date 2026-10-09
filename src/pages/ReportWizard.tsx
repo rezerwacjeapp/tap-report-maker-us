@@ -17,7 +17,7 @@ import { TableFieldInput } from "@/components/TableFieldInput";
 import { ReportReadySheet } from "@/components/ReportReadySheet";
 import { initialTableValue, isTableValue, tableHasContent } from "@/lib/table-field";
 import {
-  todayISO, mainDateFieldId, isNextDateLabel, addMonthsISO, isISODate, buildReuseDraft, formatDatePL,
+  todayISO, mainDateFieldId, isNextDateLabel, addMonthsISO, isISODate, buildReuseDraft, formatDateUS,
 } from "@/lib/report-utils";
 import {
   getCloudProfile, addCloudReport, saveCloudSnapshot,
@@ -68,7 +68,7 @@ export default function ReportWizard() {
         defaultShowCompanyHeader: template.showCompanyHeader !== false,
       };
     }
-    return { allFields: [], allTiles: [], pdfTitle: "RAPORT SERWISOWY", templateName: template?.name || "Raport serwisowy", defaultShowCompanyHeader: true };
+    return { allFields: [], allTiles: [], pdfTitle: "SERVICE REPORT", templateName: template?.name || "Service report", defaultShowCompanyHeader: true };
   }, [template]);
 
   // Field visibility
@@ -94,7 +94,7 @@ export default function ReportWizard() {
     [visibleFields]
   );
 
-  // Etap 2 — live preview + click-a-field-in-preview to jump to the form
+  // Live preview + click-a-field-in-preview to jump to the form
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
   const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const jumpToField = (id: string) => {
@@ -124,8 +124,8 @@ export default function ReportWizard() {
   }, []);
 
   // Draft
-  // New report: protocol date = today, other dates empty (a pre-filled "today" in
-  // e.g. "Data ważności legalizacji" would be wrong), "remember" fields prefilled.
+  // New report: report date = today, other dates empty (a pre-filled "today" in
+  // e.g. "Calibration due date" would be wrong), "remember" fields prefilled.
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
     const ts: Record<string, "done" | "fail" | "na"> = {};
@@ -142,7 +142,7 @@ export default function ReportWizard() {
     return { selectedTiles: [], tileStates: ts, tileNotes: {}, photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
   }, [allFields, templateId]);
 
-  // "Nowy na podstawie" — fields copied from a previous report, flagged until edited
+  // "New from this one" — fields copied from a previous report, flagged until edited
   const [copiedIds, setCopiedIds] = useState<Set<string>>(new Set());
   const [reuseInfo, setReuseInfo] = useState<string | null>(null);
 
@@ -162,7 +162,7 @@ export default function ReportWizard() {
     if (didCheckDraft.current) return;
     didCheckDraft.current = true;
 
-    // Starting from a previous report ("Nowy na podstawie")?
+    // Starting from a previous report ("New from this one")?
     if (reuseParam) {
       try {
         const raw = sessionStorage.getItem("raporton_reuse");
@@ -173,7 +173,7 @@ export default function ReportWizard() {
           clearDraft();
           setDraft(d);
           setCopiedIds(new Set(ids));
-          setReuseInfo(payload.label || "poprzedniego protokołu");
+          setReuseInfo(payload.label || "the previous report");
           setInitialized(true);
           return;
         }
@@ -225,7 +225,7 @@ export default function ReportWizard() {
     const d: ReportDraft = { ...saved, signatures: {} };
     saveDraft(d);
     setDraft(d);
-    if (resumeHasSignatures) toast("Podpisy z przerwanego raportu zostały usunięte - zbierz je ponownie.");
+    if (resumeHasSignatures) toast("Signatures from the interrupted report were removed - please collect them again.");
     if (d.additionalNotes?.trim()) setShowNotes(true);
     // Expand tile notes that have content
     const notesWithContent = Object.entries(d.tileNotes || {}).filter(([, v]) => v?.trim()).map(([k]) => k);
@@ -274,14 +274,14 @@ export default function ReportWizard() {
     update({ customFields: { ...draft.customFields, [id]: value } });
   };
 
-  // Quick picks for "Data następnego przeglądu" — counted from the protocol date
+  // Quick picks for "Next inspection date" — counted from the report date
   const mainDateId = mainDateFieldId(allFields);
   const baseDate = (mainDateId && isISODate(draft.customFields[mainDateId]) ? draft.customFields[mainDateId] : todayISO());
   const NEXT_DATE_PICKS: { label: string; months: number }[] = [
-    { label: "+1 mies.", months: 1 }, { label: "+6 mies.", months: 6 }, { label: "+1 rok", months: 12 }, { label: "+5 lat", months: 60 },
+    { label: "+1 mo", months: 1 }, { label: "+6 mo", months: 6 }, { label: "+1 yr", months: 12 }, { label: "+5 yrs", months: 60 },
   ];
   const copiedTag = (id: string) => copiedIds.has(id)
-    ? <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 align-middle"><History className="h-3 w-3" />z poprzedniego</span>
+    ? <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 align-middle"><History className="h-3 w-3" />from last report</span>
     : null;
   const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
 
@@ -290,7 +290,7 @@ export default function ReportWizard() {
 
   /**
    * Final report number. Hidden → none. An automatic number that was taken in the
-   * meantime (another report generated, a "Dokończ później" draft) moves to the next
+   * meantime (another report generated, a "Finish later" draft) moves to the next
    * free one; a number typed by hand that already exists opens a question instead.
    */
   const resolveReportNumber = async (): Promise<string | null> => {
@@ -305,13 +305,13 @@ export default function ReportWizard() {
     const next = await getCloudNextReportNumber().catch(() => "");
     if (num === draft.autoNumber && next) {
       update({ reportNumber: next, autoNumber: next });
-      toast(`Numer ${num} był już zajęty, raport dostał numer ${next}.`);
+      toast(`Number ${num} was already taken, so this report got number ${next}.`);
       return next;
     }
     setNumberConflict({
       current: num,
       next,
-      takenDate: isISODate(taken.date) ? formatDatePL(taken.date) : taken.date || "",
+      takenDate: isISODate(taken.date) ? formatDateUS(taken.date) : taken.date || "",
       takenClient: taken.clientName && taken.clientName !== "—" ? taken.clientName : "",
     });
     return null;
@@ -361,7 +361,7 @@ export default function ReportWizard() {
       // Delete cloud draft if we were editing one
       if (cloudDraftId) deleteCloudDraft(cloudDraftId).catch(() => {});
 
-      // "Zapamiętaj" fields (company data, certificates, instruments) prefill the next report
+      // "Remember" fields (company data, certifications, instruments) prefill the next report
       rememberTemplateValues(allFields, draft.customFields);
 
       // the report is done: stop autosave for good and drop the local draft
@@ -375,7 +375,7 @@ export default function ReportWizard() {
       });
     } catch (err) {
       console.error("PDF generation error:", err);
-      toast.error("Błąd generowania PDF. Sprawdź internet i spróbuj ponownie.");
+      toast.error("Could not generate the PDF. Check your connection and try again.");
     } finally {
       setGenerating(false);
     }
@@ -399,15 +399,15 @@ export default function ReportWizard() {
       });
 
       setCloudDraftId(savedId);
-      // the cloud draft ("Dokończ później") is now the only copy — keep autosave from writing a local one back
+      // the cloud draft ("Finish later") is now the only copy — keep autosave from writing a local one back
       finishedRef.current = true;
       clearInterval(autoSaveRef.current);
       clearDraft();
-      toast.success("Raport zapisany - dokończysz później");
+      toast.success("Report saved - you can finish it later");
       navigate("/");
     } catch (err) {
       console.error("Draft save error:", err);
-      toast.error("Nie udało się zapisać szkicu");
+      toast.error("Could not save the draft");
     } finally {
       setSavingDraft(false);
     }
@@ -418,7 +418,7 @@ export default function ReportWizard() {
     clearDraft();
     setCloudDraftId(null);
     setDraft(buildEmptyDraft());
-    toast.success("Szkic wyczyszczony");
+    toast.success("Draft cleared");
   };
 
   return (
@@ -427,15 +427,15 @@ export default function ReportWizard() {
       <AlertDialog open={showResume} onOpenChange={setShowResume}>
         <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Niedokończony raport</AlertDialogTitle>
+            <AlertDialogTitle>Unfinished report</AlertDialogTitle>
             <AlertDialogDescription>
-              Masz niedokończony raport ({templateName}). Kontynuować?
-              {resumeHasSignatures && " Dane wrócą, ale podpisy trzeba będzie zebrać ponownie."}
+              You have an unfinished report ({templateName}). Continue where you left off?
+              {resumeHasSignatures && " Your data will be restored, but signatures will need to be collected again."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleNewDraft}>Zacznij od nowa</AlertDialogCancel>
-            <AlertDialogAction onClick={handleResume}>Kontynuuj</AlertDialogAction>
+            <AlertDialogCancel onClick={handleNewDraft}>Start over</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResume}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -444,17 +444,17 @@ export default function ReportWizard() {
       <AlertDialog open={!!numberConflict} onOpenChange={(o) => { if (!o) setNumberConflict(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Numer {numberConflict?.current} już jest w historii</AlertDialogTitle>
+            <AlertDialogTitle>Number {numberConflict?.current} is already in your history</AlertDialogTitle>
             <AlertDialogDescription>
-              Ma go raport{numberConflict?.takenDate ? ` z ${numberConflict.takenDate}` : ""}{numberConflict?.takenClient ? ` (${numberConflict.takenClient})` : ""}.
-              {numberConflict?.next ? ` Następny wolny numer to ${numberConflict.next}.` : ""}
+              It was used on a report{numberConflict?.takenDate ? ` dated ${numberConflict.takenDate}` : ""}{numberConflict?.takenClient ? ` (${numberConflict.takenClient})` : ""}.
+              {numberConflict?.next ? ` The next free number is ${numberConflict.next}.` : ""}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => { const n = numberConflict?.current || ""; setNumberConflict(null); handleGenerate(n); }}
             >
-              Zostaw {numberConflict?.current}
+              Keep {numberConflict?.current}
             </AlertDialogCancel>
             {numberConflict?.next && (
               <AlertDialogAction
@@ -465,7 +465,7 @@ export default function ReportWizard() {
                   handleGenerate(n);
                 }}
               >
-                Użyj {numberConflict.next}
+                Use {numberConflict.next}
               </AlertDialogAction>
             )}
           </AlertDialogFooter>
@@ -478,25 +478,25 @@ export default function ReportWizard() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-accent" />
-              Przejdź na Solo
+              Upgrade to Solo
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3 pt-2">
               <p>
-                Na planie Free generujesz raporty bez limitu, ale każdy PDF ma znak wodny „RaportON.pl".
+                On the Free plan you can create unlimited reports, but every PDF carries a "RaportON.com" watermark.
               </p>
               <p>
-                Przejdź na plan <strong>Solo za 19 zł/miesiąc</strong>, aby generować raporty bez znaku wodnego.
+                Upgrade to <strong>Solo for $9.99/month</strong> to create reports without the watermark.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel>Zamknij</AlertDialogCancel>
+            <AlertDialogCancel>Close</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => navigate("/upgrade")}
               className="bg-accent hover:bg-accent/90 text-white"
             >
               <Zap className="h-4 w-4 mr-1" />
-              Przejdź na Solo
+              Upgrade to Solo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -508,10 +508,10 @@ export default function ReportWizard() {
         <button
           onClick={() => setShowCompanyHeader((v) => !v)}
           className={`flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${showCompanyHeader ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"}`}
-          title={showCompanyHeader ? "Dane firmy widoczne w PDF" : "Dane firmy ukryte w PDF"}
+          title={showCompanyHeader ? "Company info shown on the PDF" : "Company info hidden on the PDF"}
         >
           {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          <span className="hidden sm:inline">{showCompanyHeader ? "Dane firmy widoczne" : "Dane firmy ukryte"}</span>
+          <span className="hidden sm:inline">{showCompanyHeader ? "Company info shown" : "Company info hidden"}</span>
         </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
@@ -522,11 +522,11 @@ export default function ReportWizard() {
           <button
             onClick={() => setMobileView("fill")}
             className={`px-5 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "fill" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
-          >Wypełniaj</button>
+          >Fill in</button>
           <button
             onClick={() => setMobileView("preview")}
             className={`px-5 py-1.5 text-xs font-medium rounded-full transition-colors ${mobileView === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
-          >Podgląd</button>
+          >Preview</button>
         </div>
       </div>
 
@@ -538,9 +538,9 @@ export default function ReportWizard() {
           <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
             <History className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-sm flex-1">
-              Dane klienta i urządzenia skopiowane z {reuseInfo}. Pola oznaczone <strong>„z poprzedniego"</strong> sprawdź przed wygenerowaniem - pomiary, oceny, czynności i podpisy zaczynają się od zera.
+              Customer and equipment details were copied from {reuseInfo}. Check the fields marked <strong>"from last report"</strong> before generating - readings, results, checklist items and signatures start blank.
             </p>
-            <button onClick={() => setReuseInfo(null)} className="p-1 -m-1 text-muted-foreground hover:text-foreground" aria-label="Zamknij informację">
+            <button onClick={() => setReuseInfo(null)} className="p-1 -m-1 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -552,17 +552,17 @@ export default function ReportWizard() {
           <button
             onClick={() => toggleFieldVis("__reportNumber")}
             className="absolute top-0 right-0 p-1 text-muted-foreground hover:text-foreground z-10"
-            title="Ukryj to pole"
+            title="Hide this field"
           >
             <EyeOff className="h-4 w-4" />
           </button>
-          <label className="text-sm font-medium mb-1.5 block">Numer raportu</label>
+          <label className="text-sm font-medium mb-1.5 block">Report number</label>
           <input
             type="text"
             className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
             value={draft.reportNumber || ""}
             onChange={(e) => update({ reportNumber: e.target.value })}
-            placeholder="np. 001/2026"
+            placeholder="e.g. 001/2026"
           />
         </div>
         )}
@@ -573,7 +573,7 @@ export default function ReportWizard() {
             <button
               onClick={() => toggleFieldVis(field.id)}
               className="absolute top-0 right-0 p-1 text-muted-foreground hover:text-foreground z-10"
-              title="Ukryj to pole"
+              title="Hide this field"
             >
               <EyeOff className="h-4 w-4" />
             </button>
@@ -621,12 +621,12 @@ export default function ReportWizard() {
                               <button
                                 onClick={() => setTileState(tile.id, "na")}
                                 className={`w-9 h-8 rounded-lg text-[10px] font-semibold flex items-center justify-center transition-colors ${state === "na" ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                              >nd.</button>
+                              >N/A</button>
                             </div>
                             <button
                               onClick={() => toggleNoteExpand(tile.id)}
                               className={`p-1.5 rounded-lg transition-colors ${noteExpanded || noteText ? "text-accent" : "text-muted-foreground hover:text-foreground"}`}
-                              title="Uwagi"
+                              title="Notes"
                             >
                               <MessageSquare className="h-4 w-4" />
                             </button>
@@ -637,7 +637,7 @@ export default function ReportWizard() {
                               className="mt-2 w-full h-9 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:border-accent transition-colors"
                               value={noteText}
                               onChange={(e) => setTileNote(tile.id, e.target.value)}
-                              placeholder="Uwagi..."
+                              placeholder="Notes..."
                             />
                           )}
                         </div>
@@ -645,7 +645,7 @@ export default function ReportWizard() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">Brak zdefiniowanych czynności w tej sekcji.</p>
+                  <p className="text-xs text-muted-foreground">No checklist items in this section.</p>
                 )}
               </div>
 
@@ -681,7 +681,7 @@ export default function ReportWizard() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
-                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(remembered)</span>}
                   {copiedTag(field.id)}
                 </label>
                 <div className="space-y-2">
@@ -695,7 +695,7 @@ export default function ReportWizard() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
-                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(remembered)</span>}
                   {copiedTag(field.id)}
                 </label>
                 <div className="space-y-2">
@@ -709,13 +709,13 @@ export default function ReportWizard() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block pr-6" style={textStyleToCss(field.labelStyle)}>
                   {field.label}
-                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(zapamiętane)</span>}
+                  {field.remember && <span className="text-xs text-muted-foreground ml-1">(remembered)</span>}
                   {copiedTag(field.id)}
                 </label>
                 <input type={field.type === "number" ? "number" : "date"} className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent" value={draft.customFields[field.id] || ""} onChange={(e) => updateField(field.id, e.target.value)} placeholder={field.label} />
                 {field.type === "date" && isNextDateLabel(field.label) && (
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    <span className="text-[11px] text-muted-foreground mr-0.5">od {formatDatePL(baseDate)}:</span>
+                    <span className="text-[11px] text-muted-foreground mr-0.5">from {formatDateUS(baseDate)}:</span>
                     {NEXT_DATE_PICKS.map((p) => {
                       const v = addMonthsISO(baseDate, p.months);
                       const on = draft.customFields[field.id] === v;
@@ -740,11 +740,11 @@ export default function ReportWizard() {
         {/* Hidden fields indicator */}
         {hiddenFieldIds.size > 0 && (
           <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{hiddenFieldIds.size} ukrytych pól</span>
+            <span className="text-xs text-muted-foreground">{hiddenFieldIds.size} hidden {hiddenFieldIds.size === 1 ? "field" : "fields"}</span>
             <div className="flex gap-2 flex-wrap">
               {hiddenFieldIds.has("__reportNumber") && (
                 <button onClick={() => toggleFieldVis("__reportNumber")} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground bg-card rounded px-2 py-1 border border-border">
-                  <Eye className="h-3 w-3" /> Numer raportu
+                  <Eye className="h-3 w-3" /> Report number
                 </button>
               )}
               {allFields.filter((f) => hiddenFieldIds.has(f.id)).map((f) => (
@@ -762,17 +762,17 @@ export default function ReportWizard() {
             onClick={() => setShowNotes(true)}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
           >
-            <Plus className="h-4 w-4" /> Uwagi dodatkowe
+            <Plus className="h-4 w-4" /> Additional notes
           </button>
         ) : (
           <div>
-            <label className="text-sm font-medium mb-1.5 block">Uwagi dodatkowe</label>
+            <label className="text-sm font-medium mb-1.5 block">Additional notes</label>
             <div className="space-y-2">
               <textarea
                 className="w-full min-h-[80px] rounded-xl border border-border bg-card px-4 py-3 text-base focus:outline-none focus:border-accent resize-none"
                 value={draft.additionalNotes || ""}
                 onChange={(e) => update({ additionalNotes: e.target.value })}
-                placeholder="Dodatkowe uwagi, spostrzeżenia..."
+                placeholder="Additional notes, observations..."
               />
               <VoiceButton onResult={(text) => { const cur = draft.additionalNotes || ""; update({ additionalNotes: cur ? `${cur} ${text}` : text }); }} />
             </div>
@@ -782,10 +782,10 @@ export default function ReportWizard() {
 
           <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-5 py-4 space-y-2 lg:static">
             <button onClick={() => handleGenerate()} disabled={generating || savingDraft} className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50">
-              {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generuję..." : "Generuj PDF"}
+              {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />} {generating ? "Generating..." : "Generate PDF"}
             </button>
             <button onClick={handleSaveLater} disabled={savingDraft || generating} className="w-full h-10 rounded-xl border border-border text-muted-foreground font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-muted disabled:opacity-50">
-              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} {savingDraft ? "Zapisuję..." : "Dokończ później"}
+              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pause className="h-4 w-4" />} {savingDraft ? "Saving..." : "Finish later"}
             </button>
           </div>
         </div>
@@ -818,7 +818,7 @@ export default function ReportWizard() {
         blob={ready?.blob ?? null}
         filename={ready?.filename ?? ""}
         subtitle={ready?.subtitle}
-        closeLabel="Wróć na pulpit"
+        closeLabel="Back to home"
         onClose={() => { clearDraft(); setReady(null); navigate("/"); }}
       />
     </div>

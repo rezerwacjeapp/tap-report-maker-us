@@ -17,15 +17,15 @@ export default function SetNewPassword() {
     setError("");
 
     if (!password) {
-      setError("Podaj nowe hasło");
+      setError("Enter a new password");
       return;
     }
     if (password.length < 6) {
-      setError("Hasło musi mieć co najmniej 6 znaków");
+      setError("Password must be at least 6 characters");
       return;
     }
     if (password !== confirmPw) {
-      setError("Hasła nie są identyczne");
+      setError("Passwords do not match");
       return;
     }
 
@@ -49,15 +49,15 @@ export default function SetNewPassword() {
               <CheckCircle2 className="h-8 w-8 text-accent" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Hasło zmienione!</h1>
+          <h1 className="text-2xl font-bold">Password updated!</h1>
           <p className="text-sm text-muted-foreground">
-            Twoje nowe hasło zostało zapisane. Możesz teraz korzystać z aplikacji.
+            Your new password has been saved. You can now use the app.
           </p>
           <a
             href="/"
             className="inline-block h-12 px-8 rounded-xl bg-accent text-white font-medium leading-[3rem] active:scale-[0.98] transition-transform"
           >
-            Przejdź do aplikacji
+            Continue to the app
           </a>
         </div>
       </div>
@@ -69,12 +69,12 @@ export default function SetNewPassword() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" />
-          <p className="text-sm text-muted-foreground">Ustaw nowe hasło</p>
+          <p className="text-sm text-muted-foreground">Set a new password</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-sm text-muted-foreground text-center">
-            Wpisz nowe hasło do swojego konta.
+            Enter a new password for your account.
           </p>
 
           <div className="relative">
@@ -82,7 +82,7 @@ export default function SetNewPassword() {
             <input
               type={showPw ? "text" : "password"}
               className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-11 text-base focus:outline-none focus:border-accent transition-colors"
-              placeholder="Nowe hasło (min. 6 znaków)"
+              placeholder="New password (min. 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
@@ -102,7 +102,7 @@ export default function SetNewPassword() {
             <input
               type={showPw ? "text" : "password"}
               className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-4 text-base focus:outline-none focus:border-accent transition-colors"
-              placeholder="Powtórz nowe hasło"
+              placeholder="Repeat new password"
               value={confirmPw}
               onChange={(e) => setConfirmPw(e.target.value)}
               autoComplete="new-password"
@@ -118,7 +118,7 @@ export default function SetNewPassword() {
             disabled={loading}
             className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
           >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Zapisz nowe hasło"}
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save new password"}
           </button>
         </form>
       </div>

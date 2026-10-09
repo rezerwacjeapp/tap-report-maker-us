@@ -3,10 +3,10 @@ import { Home, LayoutGrid, ClipboardList, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { path: "/", icon: Home, label: "Start" },
-  { path: "/select-template", icon: LayoutGrid, label: "Szablony" },
-  { path: "/reports", icon: ClipboardList, label: "Historia" },
-  { path: "/profile", icon: User, label: "Profil" },
+  { path: "/", icon: Home, label: "Home" },
+  { path: "/select-template", icon: LayoutGrid, label: "Templates" },
+  { path: "/reports", icon: ClipboardList, label: "History" },
+  { path: "/profile", icon: User, label: "Profile" },
 ];
 
 export function BottomNav() {

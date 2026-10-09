@@ -15,7 +15,7 @@ export function ConsentModal({ onAccepted }: Props) {
 
   const handleAccept = async () => {
     if (!terms) {
-      setError("Musisz zaakceptować regulamin, żeby korzystać z aplikacji.");
+      setError("You need to accept the Terms of Service to use the app.");
       return;
     }
     setError("");
@@ -24,7 +24,7 @@ export function ConsentModal({ onAccepted }: Props) {
       await saveConsent(marketing);
       onAccepted();
     } catch {
-      setError("Wystąpił błąd. Spróbuj ponownie.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ export function ConsentModal({ onAccepted }: Props) {
           <h2 className="flex justify-center">
             <BrandLockup markClassName="h-7 w-auto" textClassName="text-xl" />
           </h2>
-          <p className="text-sm text-muted-foreground">Jeszcze tylko krok - potwierdź poniżej</p>
+          <p className="text-sm text-muted-foreground">One more step - please confirm below</p>
         </div>
 
         <div className="space-y-3">
@@ -50,10 +50,10 @@ export function ConsentModal({ onAccepted }: Props) {
               className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
             />
             <span className="text-sm leading-snug">
-              Akceptuję{" "}
-              <a href="/regulamin" target="_blank" className="text-accent underline">Regulamin</a>
-              {" "}i{" "}
-              <a href="/prywatnosc" target="_blank" className="text-accent underline">Politykę prywatności</a>
+              I am at least 18 years old and I agree to the{" "}
+              <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
+              {" "}and{" "}
+              <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>
               {" "}<span className="text-destructive">*</span>
             </span>
           </label>
@@ -67,7 +67,7 @@ export function ConsentModal({ onAccepted }: Props) {
               className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
             />
             <span className="text-sm leading-snug text-muted-foreground">
-              Chcę otrzymywać informacje o nowościach i promocjach RaportON
+              Send me occasional emails about RaportON updates and offers
             </span>
           </label>
         </div>
@@ -81,11 +81,11 @@ export function ConsentModal({ onAccepted }: Props) {
           disabled={loading}
           className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
         >
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Przejdź do aplikacji"}
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Continue to the app"}
         </button>
 
         <p className="text-[11px] text-muted-foreground text-center">
-          <span className="text-destructive">*</span> pole wymagane
+          <span className="text-destructive">*</span> required
         </p>
       </div>
     </div>

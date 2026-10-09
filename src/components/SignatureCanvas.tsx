@@ -98,11 +98,11 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
           onTouchEnd={end}
         />
         <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground pointer-events-none select-none">
-          {label || "Podpis"}
+          {label || "Signature"}
         </p>
       </div>
       <Button variant="outline" size="sm" onClick={clear} className="w-full">
-        <Eraser className="h-4 w-4 mr-1" /> Wyczyść podpis
+        <Eraser className="h-4 w-4 mr-1" /> Clear signature
       </Button>
     </div>
   );

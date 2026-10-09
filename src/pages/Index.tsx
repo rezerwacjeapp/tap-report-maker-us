@@ -6,11 +6,12 @@ import { getUserTemplates, fetchUserTemplates, STARTER_TEMPLATES, type ReportTem
 import {
   checkReportLimit, getCloudDrafts, deleteCloudDraft, getCloudReportHistory, getCloudProfile, type CloudDraft,
 } from "@/lib/supabase-storage";
-import { computeReminders, reminderWhen, formatDatePL, type InspectionReminder } from "@/lib/report-utils";
+import { computeReminders, reminderWhen, formatDateUS, parseLocalDate, type InspectionReminder } from "@/lib/report-utils";
 import { prepareReuse } from "@/lib/reuse-report";
 import { BrandLockup } from "@/components/BrandLogo";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
 const QUICK_START_KEY = "raporton_quick_start";
@@ -92,14 +93,14 @@ const Index = () => {
     try {
       const url = await prepareReuse(report);
       if (url) navigate(url);
-      else toast.error("Szablon tego raportu już nie istnieje.");
+      else toast.error("The template for this report no longer exists.");
     } finally {
       setReuseBusy(null);
     }
   };
 
   const smsHref = (r: InspectionReminder) => {
-    const body = `Dzień dobry, zbliża się termin przeglądu (${r.templateName.toLowerCase()}) - ${formatDatePL(r.dueDate)}. Kiedy mogę przyjechać?${companyName ? ` ${companyName}` : ""}`;
+    const body = `Hi, a quick reminder that your next service (${r.templateName}) is due on ${formatDateUS(r.dueDate)}. When would be a good time to schedule it?${companyName ? ` - ${companyName}` : ""}`;
     return `sms:${r.phone}?&body=${encodeURIComponent(body)}`;
   };
 
@@ -129,8 +130,8 @@ const Index = () => {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("pl-PL", {
-        day: "numeric", month: "short",
+      return parseLocalDate(dateStr).toLocaleDateString("en-US", {
+        month: "short", day: "numeric",
       });
     } catch { return dateStr; }
   };
@@ -144,33 +145,33 @@ const Index = () => {
     try {
       const diff = Date.now() - new Date(dateStr).getTime();
       const mins = Math.floor(diff / 60000);
-      if (mins < 1) return "przed chwilą";
-      if (mins < 60) return `${mins} min temu`;
+      if (mins < 1) return "just now";
+      if (mins < 60) return `${mins} min ago`;
       const hours = Math.floor(mins / 60);
-      if (hours < 24) return `${hours} godz. temu`;
+      if (hours < 24) return `${hours} hr ago`;
       const days = Math.floor(hours / 24);
-      if (days === 1) return "wczoraj";
-      return `${days} dni temu`;
+      if (days === 1) return "yesterday";
+      return `${days} days ago`;
     } catch { return ""; }
   };
 
-  // Plan bar: free / trial users see it right under "Nowy raport" (with "Przejdź na Solo"),
+  // Plan bar: free / trial users see it right under "New report" (with "Upgrade to Solo"),
   // Solo users keep it lower on the page.
   const planBar = planInfo && (
     <div className="rounded-2xl glass-card p-4">
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-            {planInfo.plan === "solo" ? "Plan Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Plan Free"}
+            {planInfo.plan === "solo" ? "Solo plan" : planInfo.plan === "trial" ? "Free trial" : "Free plan"}
           </span>
           {planInfo.plan === "trial" && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-semibold whitespace-nowrap">
-              {planInfo.trialDaysLeft} {planInfo.trialDaysLeft === 1 ? "dzień" : "dni"} pozostało
+              {planInfo.trialDaysLeft} {planInfo.trialDaysLeft === 1 ? "day" : "days"} left
             </span>
           )}
           {planInfo.plan === "free" && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold whitespace-nowrap">
-              ze znakiem wodnym
+              with watermark
             </span>
           )}
         </div>
@@ -180,22 +181,22 @@ const Index = () => {
             className="shrink-0 flex items-center gap-1 text-xs font-medium text-accent hover:underline whitespace-nowrap"
           >
             <Zap className="h-3 w-3" />
-            Przejdź na Solo
+            Upgrade to Solo
           </button>
         )}
       </div>
 
       {planInfo.plan === "trial" ? (
         <p className="text-[11px] text-muted-foreground">
-          Pełny dostęp przez 7 dni - raporty bez znaku wodnego. Potem: nielimitowane raporty ze znakiem lub Solo bez znaku.
+          Full access for 7 days - reports without a watermark. After that: unlimited reports with a watermark, or Solo without one.
         </p>
       ) : planInfo.plan === "free" ? (
         <p className="text-[11px] text-muted-foreground">
-          Generujesz raporty bez limitu. Każdy PDF ma znak wodny „RaportON.pl". Przejdź na Solo, aby go usunąć.
+          Unlimited reports. Every PDF carries a "RaportON.com" watermark. Upgrade to Solo to remove it.
         </p>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Raporty bez limitu i bez znaku wodnego
+          Unlimited reports, no watermark
         </p>
       )}
     </div>
@@ -208,25 +209,25 @@ const Index = () => {
         <div>
           <h1 className="sr-only">RaportON</h1>
           <BrandLockup markClassName="h-8 w-auto" textClassName="text-2xl" />
-          <p className="text-sm text-muted-foreground mt-1">Raport serwisowy w minutę</p>
+          <p className="text-sm text-muted-foreground mt-1">Service reports in a minute</p>
         </div>
         <div className="flex items-center gap-2 mt-1">
           <a
-            href="/kontakt"
+            href="/contact"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center rounded-xl px-2.5 py-2 text-muted-foreground hover:text-accent glass-card hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all"
-            title="Kontakt"
+            title="Contact"
           >
             <MessageCircle className="h-4 w-4" />
           </a>
           <button
             onClick={async () => { await signOut(); navigate("/login"); }}
             className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:text-destructive glass-card hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all"
-            title="Wyloguj się"
+            title="Sign out"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Wyloguj</span>
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>
@@ -243,21 +244,21 @@ const Index = () => {
               <Plus className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold">Nowy raport</h2>
-              <p className="text-sm text-white/75 mt-0.5">Wybierz szablon i wypełnij dane</p>
+              <h2 className="text-lg font-semibold">New report</h2>
+              <p className="text-sm text-white/75 mt-0.5">Pick a template and fill it in</p>
             </div>
             <ChevronRight className="h-5 w-5 text-white/60" />
           </div>
         </button>
 
-        {/* Plan bar (Free / trial) - "Przejdź na Solo" right under "Nowy raport" */}
+        {/* Plan bar (Free / trial) - "Upgrade to Solo" right under "New report" */}
         {planInfo && planInfo.plan !== "solo" && planBar}
 
         {/* Saved drafts */}
         {cloudDrafts.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-              Niedokończone raporty
+              Unfinished reports
             </p>
             <div className="rounded-2xl glass-card overflow-hidden" style={{ borderColor: 'rgba(245, 158, 11, 0.2)' }}>
               {cloudDrafts.map((d, i) => {
@@ -291,7 +292,7 @@ const Index = () => {
                     <button
                       onClick={() => handleDeleteDraft(d.id)}
                       className="p-1.5 text-muted-foreground hover:text-destructive shrink-0 transition-colors"
-                      title="Usuń szkic"
+                      title="Delete draft"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -302,12 +303,12 @@ const Index = () => {
           </div>
         )}
 
-        {/* Upcoming inspections — from "Data następnego przeglądu" in past reports */}
+        {/* Upcoming inspections — from "Next ... date" fields in past reports */}
         {reminders.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <CalendarClock className="h-3.5 w-3.5" /> Nadchodzące przeglądy
+                <CalendarClock className="h-3.5 w-3.5" /> Upcoming inspections
               </p>
               <span className="text-[11px] text-muted-foreground">{reminders.length}</span>
             </div>
@@ -320,7 +321,7 @@ const Index = () => {
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{r.clientName}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{r.templateName} • {formatDatePL(r.dueDate)}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{r.templateName} • {formatDateUS(r.dueDate)}</p>
                       </div>
                       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${overdue ? "bg-red-500/10 text-red-600 dark:text-red-400" : soon ? "bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground"}`}>
                         {reminderWhen(r.daysLeft)}
@@ -332,14 +333,14 @@ const Index = () => {
                         disabled={reuseBusy === r.reportId}
                         className="h-8 rounded-lg bg-accent/10 text-accent px-3 text-xs font-semibold flex items-center gap-1.5 hover:bg-accent/15 transition-colors disabled:opacity-60"
                       >
-                        {reuseBusy === r.reportId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} Nowy protokół
+                        {reuseBusy === r.reportId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} New report
                       </button>
                       {r.phone && (
                         <a
                           href={smsHref(r)}
                           className="h-8 rounded-lg border border-border px-3 text-xs font-medium flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          <MessageSquareText className="h-3.5 w-3.5" /> Przypomnij SMS-em
+                          <MessageSquareText className="h-3.5 w-3.5" /> Text a reminder
                         </a>
                       )}
                     </div>
@@ -354,17 +355,17 @@ const Index = () => {
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">{reportsLoaded ? (reports.length >= 100 ? "100+" : reports.length) : "…"}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Raportów</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Reports</p>
           </div>
           <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">{userTemplateCount}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Szablonów</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Templates</p>
           </div>
           <div className="rounded-2xl glass-card p-3.5">
             <p className="text-xl font-semibold">
               {reports.length > 0 ? formatDate(reports[0].date) : "-"}
             </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Ostatni</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Latest</p>
           </div>
         </div>
 
@@ -376,10 +377,10 @@ const Index = () => {
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Ostatnie raporty
+                Recent reports
               </p>
               <button onClick={() => navigate("/reports")} className="text-xs text-accent font-medium">
-                Wszystkie
+                See all
               </button>
             </div>
             <div className="rounded-2xl glass-card overflow-hidden">
@@ -395,7 +396,7 @@ const Index = () => {
                     <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
-                        {report.clientName !== "—" ? report.clientName : report.filename}
+                        {report.clientName && report.clientName !== "—" && report.clientName !== "-" ? report.clientName : report.filename}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-muted-foreground">{formatDate(report.date)}</span>
@@ -415,7 +416,7 @@ const Index = () => {
         {quickStartTemplates.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-              Szybki start
+              Quick start
             </p>
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
               {quickStartTemplates.map((tmpl) => {
@@ -442,11 +443,11 @@ const Index = () => {
         {!hasProfile && (
           <div className="rounded-2xl glass-card p-4" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
             <p className="text-sm">
-              <strong>Wskazówka:</strong> Uzupełnij{" "}
+              <strong>Tip:</strong> Fill in your{" "}
               <span className="text-accent font-semibold cursor-pointer" onClick={() => navigate("/profile")}>
-                profil firmy
+                company profile
               </span>
-              , aby Twoje dane pojawiały się automatycznie w raportach.
+              so your details appear on every report automatically.
             </p>
           </div>
         )}
@@ -454,9 +455,9 @@ const Index = () => {
         {/* Template request banner */}
         <div className="rounded-2xl glass-card p-4" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
           <p className="text-sm">
-            <strong>Potrzebujesz szablonu?</strong> Wyślij swój raport na{" "}
-            <span className="text-accent font-semibold">kontakt.raporton@gmail.com</span>{" "}
-            - przygotujemy szablon za Ciebie.
+            <strong>Need a template?</strong> Send us a sample of your report at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-accent font-semibold">{SUPPORT_EMAIL}</a>{" "}
+            and we'll build the template for you.
           </p>
         </div>
       </main>

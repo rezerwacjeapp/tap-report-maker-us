@@ -6,7 +6,7 @@ interface Props {
   open: boolean;
   blob: Blob | null;
   filename: string;
-  /** e.g. "Hotel Pod Jaworem • Przegląd klimatyzacji" */
+  /** e.g. "Maple Street Diner • HVAC Maintenance" */
   subtitle?: string;
   closeLabel?: string;
   onClose: () => void;
@@ -26,9 +26,9 @@ function downloadBlob(blob: Blob, filename: string) {
 /**
  * Shown right after a PDF is built. Sharing a file needs a fresh tap
  * (browsers require user activation), which is why the PDF is generated
- * first and "Wyślij" is a separate button here.
+ * first and "Send" is a separate button here.
  */
-export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = "Gotowe", onClose }: Props) {
+export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = "Done", onClose }: Props) {
   const file = useMemo(() => (blob ? new File([blob], filename, { type: "application/pdf" }) : null), [blob, filename]);
   const [sharing, setSharing] = useState(false);
 
@@ -56,7 +56,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
       await navigator.share({ files: [file], title: filename.replace(/\.pdf$/i, "") });
     } catch (err: any) {
       if (err?.name !== "AbortError") {
-        toast.error("Telefon nie pozwolił udostępnić pliku - pobierz PDF i wyślij go ręcznie.");
+        toast.error("Your phone didn't allow sharing the file - download the PDF and send it manually.");
       }
     } finally {
       setSharing(false);
@@ -65,7 +65,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
 
   const handleDownload = () => {
     downloadBlob(blob, filename);
-    toast.success("PDF pobrany");
+    toast.success("PDF downloaded");
   };
 
   const sizeKb = Math.max(1, Math.round(blob.size / 1024));
@@ -74,7 +74,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="rr-title">
       <div className="rr-backdrop absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="rr-panel relative w-full sm:max-w-sm bg-background rounded-t-3xl sm:rounded-3xl shadow-2xl px-6 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <button onClick={onClose} className="absolute right-4 top-4 p-1.5 rounded-full text-muted-foreground hover:bg-muted" aria-label="Zamknij">
+        <button onClick={onClose} className="absolute right-4 top-4 p-1.5 rounded-full text-muted-foreground hover:bg-muted" aria-label="Close">
           <X className="h-5 w-5" />
         </button>
 
@@ -102,7 +102,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
           </div>
         </div>
 
-        <h2 id="rr-title" className="text-xl text-center">PDF gotowy</h2>
+        <h2 id="rr-title" className="text-xl text-center">PDF ready</h2>
         {subtitle && <p className="text-sm text-muted-foreground text-center mt-1 truncate">{subtitle}</p>}
         <p className="text-[11px] text-muted-foreground text-center mt-1 break-all">{filename} • {sizeKb} KB</p>
 
@@ -114,14 +114,14 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
                 disabled={sharing}
                 className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-emerald-600/20 disabled:opacity-60"
               >
-                <Send className="h-5 w-5" /> Wyślij klientowi
+                <Send className="h-5 w-5" /> Send to customer
               </button>
-              <p className="text-[11px] text-muted-foreground text-center -mt-0.5">WhatsApp, e-mail, SMS - wybierasz w telefonie</p>
+              <p className="text-[11px] text-muted-foreground text-center -mt-0.5">Text, email, WhatsApp - pick on your phone</p>
               <button
                 onClick={handleDownload}
                 className="w-full h-11 rounded-xl border border-border font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors"
               >
-                <Download className="h-4 w-4" /> Pobierz PDF
+                <Download className="h-4 w-4" /> Download PDF
               </button>
             </>
           ) : (
@@ -129,7 +129,7 @@ export function ReportReadySheet({ open, blob, filename, subtitle, closeLabel = 
               onClick={handleDownload}
               className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-emerald-600/20"
             >
-              <Download className="h-5 w-5" /> Pobierz PDF
+              <Download className="h-5 w-5" /> Download PDF
             </button>
           )}
           <button onClick={onClose} className="w-full h-10 rounded-xl text-sm text-muted-foreground hover:text-foreground transition-colors">

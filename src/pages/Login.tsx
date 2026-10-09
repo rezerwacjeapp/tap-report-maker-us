@@ -49,7 +49,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     if (!email.trim() || !password) {
-      setError("Podaj email i hasło");
+      setError("Enter your email and password");
       return;
     }
     if (cooldown) return;
@@ -76,7 +76,7 @@ export default function Login() {
     e.preventDefault();
     setResetError("");
     if (!resetEmail.trim()) {
-      setResetError("Podaj adres email");
+      setResetError("Enter your email address");
       return;
     }
     setResetLoading(true);
@@ -100,19 +100,19 @@ export default function Login() {
                 <CheckCircle2 className="h-8 w-8 text-accent" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">Sprawdź email</h1>
+            <h1 className="text-2xl font-bold">Check your email</h1>
             <p className="text-sm text-muted-foreground">
-              Wysłaliśmy link do resetowania hasła na <strong className="text-foreground">{resetEmail}</strong>.
-              Kliknij go, żeby ustawić nowe hasło.
+              We sent a password reset link to <strong className="text-foreground">{resetEmail}</strong>.
+              Click it to set a new password.
             </p>
             <p className="text-xs text-muted-foreground">
-              Nie widzisz wiadomości? Sprawdź folder spam.
+              Don't see it? Check your spam folder.
             </p>
             <button
               onClick={() => { setShowReset(false); setResetSent(false); setResetEmail(""); setResetError(""); }}
               className="inline-block h-12 px-8 rounded-xl bg-accent text-white font-medium leading-[3rem] active:scale-[0.98] transition-transform"
             >
-              Wróć do logowania
+              Back to sign in
             </button>
           </div>
         </div>
@@ -123,13 +123,13 @@ export default function Login() {
       <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center space-y-2">
-            <a href="/" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
-            <p className="text-sm text-muted-foreground">Resetowanie hasła</p>
+            <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+            <p className="text-sm text-muted-foreground">Reset your password</p>
           </div>
 
           <form onSubmit={handleResetPassword} className="space-y-4">
             <p className="text-sm text-muted-foreground text-center">
-              Podaj email, na który wyślemy link do ustawienia nowego hasła.
+              Enter your email and we'll send you a link to set a new password.
             </p>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -153,7 +153,7 @@ export default function Login() {
               disabled={resetLoading}
               className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
-              {resetLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Wyślij link resetujący"}
+              {resetLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send reset link"}
             </button>
           </form>
 
@@ -162,7 +162,7 @@ export default function Login() {
               onClick={() => { setShowReset(false); setResetError(""); }}
               className="text-sm text-accent font-medium hover:underline inline-flex items-center gap-1"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Wróć do logowania
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
             </button>
           </div>
         </div>
@@ -176,8 +176,8 @@ export default function Login() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
-          <a href="/" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
-          <p className="text-sm text-muted-foreground">Protokoły serwisowe w 60 sekund</p>
+          <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <p className="text-sm text-muted-foreground">Service reports in 60 seconds</p>
         </div>
 
         <div className="space-y-4">
@@ -191,7 +191,7 @@ export default function Login() {
             {googleLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
               <>
                 <GoogleIcon />
-                Kontynuuj z Google
+                Continue with Google
               </>
             )}
           </button>
@@ -199,7 +199,7 @@ export default function Login() {
           {/* Separator */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">lub</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">or</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
@@ -222,7 +222,7 @@ export default function Login() {
               <input
                 type={showPw ? "text" : "password"}
                 className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-11 text-base focus:outline-none focus:border-accent transition-colors"
-                placeholder="Hasło"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -245,7 +245,7 @@ export default function Login() {
               disabled={loading || cooldown}
               className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : cooldown ? "Odczekaj..." : "Zaloguj się"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : cooldown ? "Please wait..." : "Sign in"}
             </button>
           </form>
 
@@ -255,7 +255,7 @@ export default function Login() {
               onClick={() => { setShowReset(true); setResetEmail(email); }}
               className="text-xs text-muted-foreground hover:text-accent transition-colors"
             >
-              Nie pamiętam hasła
+              Forgot password?
             </button>
           </div>
         </div>
@@ -263,9 +263,9 @@ export default function Login() {
         {/* Links */}
         <div className="text-center space-y-3">
           <p className="text-sm text-muted-foreground">
-            Nie masz konta?{" "}
+            Don't have an account?{" "}
             <Link to="/register" className="text-accent font-medium hover:underline">
-              Zarejestruj się
+              Sign up
             </Link>
           </p>
         </div>

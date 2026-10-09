@@ -44,124 +44,124 @@ export interface TileBlock {
 // ============================================================
 
 export const FIELD_CATALOG: FieldBlock[] = [
-  // --- Dane klienta ---
+  // --- Customer ---
   {
     id: "fb_client_name",
-    category: "Dane klienta",
-    label: "Nazwa klienta",
-    fields: [{ id: "f_client", label: "Nazwa klienta", type: "text", remember: false, order: 0 }],
-  },
-  {
-    id: "fb_client_nip",
-    category: "Dane klienta",
-    label: "NIP klienta",
-    fields: [{ id: "f_nip", label: "NIP klienta", type: "text", remember: false, order: 1 }],
+    category: "Customer",
+    label: "Customer name",
+    fields: [{ id: "f_client", label: "Customer name", type: "text", remember: false, order: 0 }],
   },
   {
     id: "fb_client_address",
-    category: "Dane klienta",
-    label: "Adres obiektu",
-    fields: [{ id: "f_address", label: "Adres obiektu", type: "text", remember: false, order: 2 }],
+    category: "Customer",
+    label: "Service address",
+    fields: [{ id: "f_address", label: "Service address", type: "text", remember: false, order: 1 }],
   },
   {
     id: "fb_client_phone",
-    category: "Dane klienta",
-    label: "Telefon klienta",
-    fields: [{ id: "f_phone", label: "Telefon klienta", type: "text", remember: false, order: 3 }],
+    category: "Customer",
+    label: "Customer phone",
+    fields: [{ id: "f_phone", label: "Customer phone", type: "text", remember: false, order: 2 }],
   },
   {
     id: "fb_client_email",
-    category: "Dane klienta",
-    label: "Email klienta",
-    fields: [{ id: "f_email", label: "Email klienta", type: "text", remember: false, order: 4 }],
+    category: "Customer",
+    label: "Customer email",
+    fields: [{ id: "f_email", label: "Customer email", type: "text", remember: false, order: 3 }],
   },
   {
     id: "fb_contact_person",
-    category: "Dane klienta",
-    label: "Osoba kontaktowa",
-    fields: [{ id: "f_contact", label: "Osoba kontaktowa", type: "text", remember: false, order: 5 }],
+    category: "Customer",
+    label: "Contact person",
+    fields: [{ id: "f_contact", label: "Contact person", type: "text", remember: false, order: 4 }],
   },
 
-  // --- Data i czas ---
+  // --- Date & job ---
   {
     id: "fb_date",
-    category: "Data i czas",
-    label: "Data wykonania",
-    fields: [{ id: "f_date", label: "Data wykonania", type: "date", remember: false, order: 6 }],
+    category: "Date & job",
+    label: "Service date",
+    fields: [{ id: "f_date", label: "Service date", type: "date", remember: false, order: 5 }],
   },
   {
     id: "fb_date_next",
-    category: "Data i czas",
-    label: "Data następnego przeglądu",
-    fields: [{ id: "f_date_next", label: "Data następnego przeglądu", type: "date", remember: false, order: 7 }],
+    category: "Date & job",
+    label: "Next service date",
+    fields: [{ id: "f_date_next", label: "Next service date", type: "date", remember: false, order: 6 }],
   },
   {
     id: "fb_contract_nr",
-    category: "Data i czas",
-    label: "Numer umowy / zlecenia",
-    fields: [{ id: "f_contract", label: "Numer umowy / zlecenia", type: "text", remember: false, order: 8 }],
+    category: "Date & job",
+    label: "Work order / contract #",
+    fields: [{ id: "f_contract", label: "Work order / contract #", type: "text", remember: false, order: 7 }],
+  },
+  {
+    id: "fb_po_nr",
+    category: "Date & job",
+    label: "PO number",
+    fields: [{ id: "f_po", label: "PO number", type: "text", remember: false, order: 8 }],
   },
 
-  // --- Obiekt / miejsce ---
+  // --- Site / equipment ---
   {
     id: "fb_object_name",
-    category: "Obiekt / miejsce",
-    label: "Nazwa obiektu",
-    fields: [{ id: "f_obj_name", label: "Nazwa obiektu", type: "text", remember: false, order: 9 }],
+    category: "Site / equipment",
+    label: "Site / building name",
+    fields: [{ id: "f_obj_name", label: "Site / building name", type: "text", remember: false, order: 9 }],
   },
   {
     id: "fb_object_location",
-    category: "Obiekt / miejsce",
-    label: "Lokalizacja",
-    fields: [{ id: "f_obj_loc", label: "Lokalizacja", type: "text", remember: false, order: 10 }],
+    category: "Site / equipment",
+    label: "Location",
+    fields: [{ id: "f_obj_loc", label: "Location", type: "text", remember: false, order: 10 }],
   },
   {
     id: "fb_object_number",
-    category: "Obiekt / miejsce",
-    label: "Numer / oznaczenie",
-    fields: [{ id: "f_obj_num", label: "Numer / oznaczenie", type: "text", remember: false, order: 11 }],
+    category: "Site / equipment",
+    label: "Unit / tag number",
+    fields: [{ id: "f_obj_num", label: "Unit / tag number", type: "text", remember: false, order: 11 }],
   },
   {
     id: "fb_object_desc",
-    category: "Obiekt / miejsce",
-    label: "Opis",
-    fields: [{ id: "f_obj_desc", label: "Opis", type: "textarea", remember: false, order: 12 }],
+    category: "Site / equipment",
+    label: "Description",
+    fields: [{ id: "f_obj_desc", label: "Description", type: "textarea", remember: false, order: 12 }],
   },
 
-  // --- Inne ---
+  // --- Other ---
   {
     id: "fb_notes",
-    category: "Inne",
-    label: "Uwagi",
-    fields: [{ id: "f_notes", label: "Uwagi", type: "textarea", remember: false, order: 13 }],
+    category: "Other",
+    label: "Notes",
+    fields: [{ id: "f_notes", label: "Notes", type: "textarea", remember: false, order: 13 }],
   },
   {
     id: "fb_condition",
-    category: "Inne",
-    label: "Stan ogólny",
-    fields: [{ id: "f_condition", label: "Stan ogólny", type: "textarea", remember: false, order: 14 }],
+    category: "Other",
+    label: "Overall condition",
+    fields: [{ id: "f_condition", label: "Overall condition", type: "textarea", remember: false, order: 14 }],
   },
   {
     id: "fb_recommendations",
-    category: "Inne",
-    label: "Zalecenia",
-    fields: [{ id: "f_recommend", label: "Zalecenia", type: "textarea", remember: false, order: 15 }],
+    category: "Other",
+    label: "Recommendations",
+    fields: [{ id: "f_recommend", label: "Recommendations", type: "textarea", remember: false, order: 15 }],
   },
 
-  // --- Tabele ---
+  // --- Tables ---
   {
     id: "fb_table_materials",
-    category: "Tabele",
-    label: "Użyte materiały i części",
-    fields: [{ id: "tb_materials", label: "Użyte materiały i części", type: "table" as CustomFieldType, remember: false, order: 16,
-      tableColumns: [{ id: "c_name", label: "Nazwa" }, { id: "c_qty", label: "Ilość", kind: "number" }, { id: "c_unit", label: "Jedn." }] }],
+    category: "Tables",
+    label: "Parts & materials used",
+    fields: [{ id: "tb_materials", label: "Parts & materials used", type: "table" as CustomFieldType, remember: false, order: 16,
+      tableColumns: [{ id: "c_name", label: "Item" }, { id: "c_qty", label: "Qty", kind: "number" }, { id: "c_unit", label: "Unit" }] }],
   },
   {
     id: "fb_table_devices",
-    category: "Tabele",
-    label: "Lista urządzeń",
-    fields: [{ id: "tb_devices", label: "Lista urządzeń", type: "table" as CustomFieldType, remember: false, order: 17,
-      tableColumns: [{ id: "c_dev", label: "Urządzenie" }, { id: "c_model", label: "Marka / model" }, { id: "c_sn", label: "Nr fabryczny" }, { id: "c_loc", label: "Lokalizacja" }] }],
+    category: "Tables",
+    label: "Equipment list",
+    fields: [{ id: "tb_devices", label: "Equipment list", type: "table" as CustomFieldType, remember: false, order: 17,
+      tableColumns: [{ id: "c_dev", label: "Equipment" }, { id: "c_model", label: "Make / model" }, { id: "c_sn", label: "Serial #" }, { id: "c_loc", label: "Location" }] }],
   },
 ];
 
@@ -954,7 +954,7 @@ export async function createBlankTemplate(name: string): Promise<ReportTemplate>
     name,
     description: "",
     icon: "FileText",
-    category: "Własne",
+    category: "Custom",
     builtIn: false,
     pdfTitle: name.toUpperCase(),
     fields: [],

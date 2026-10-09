@@ -41,19 +41,19 @@ export default function Register() {
     setError("");
 
     if (!email.trim() || !password) {
-      setError("Podaj email i hasło");
+      setError("Enter your email and password");
       return;
     }
     if (password.length < 6) {
-      setError("Hasło musi mieć co najmniej 6 znaków");
+      setError("Password must be at least 6 characters");
       return;
     }
     if (password !== confirmPw) {
-      setError("Hasła nie są identyczne");
+      setError("Passwords do not match");
       return;
     }
     if (!terms) {
-      setError("Musisz zaakceptować regulamin");
+      setError("You need to accept the Terms of Service");
       return;
     }
 
@@ -80,16 +80,16 @@ export default function Register() {
               <CheckCircle2 className="h-8 w-8 text-accent" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Sprawdź email</h1>
+          <h1 className="text-2xl font-bold">Check your email</h1>
           <p className="text-sm text-muted-foreground">
-            Wysłaliśmy link potwierdzający na <strong className="text-foreground">{email}</strong>.
-            Kliknij go, żeby aktywować konto.
+            We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
+            Click it to activate your account.
           </p>
           <Link
             to="/login"
             className="inline-block h-12 px-8 rounded-xl bg-accent text-white font-medium leading-[3rem] active:scale-[0.98] transition-transform"
           >
-            Przejdź do logowania
+            Go to sign in
           </Link>
         </div>
       </div>
@@ -101,8 +101,8 @@ export default function Register() {
       <div className="w-full max-w-sm space-y-8">
         {/* Brand */}
         <div className="text-center space-y-2">
-          <a href="/" className="inline-block" aria-label="RaportON - strona główna"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
-          <p className="text-sm text-muted-foreground">Utwórz darmowe konto</p>
+          <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <p className="text-sm text-muted-foreground">Create your free account</p>
         </div>
 
         <div className="space-y-4">
@@ -116,7 +116,7 @@ export default function Register() {
             {googleLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
               <>
                 <GoogleIcon />
-                Zarejestruj się z Google
+                Sign up with Google
               </>
             )}
           </button>
@@ -124,7 +124,7 @@ export default function Register() {
           {/* Separator */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">lub</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">or</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
@@ -147,7 +147,7 @@ export default function Register() {
               <input
                 type={showPw ? "text" : "password"}
                 className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-11 text-base focus:outline-none focus:border-accent transition-colors"
-                placeholder="Hasło (min. 6 znaków)"
+                placeholder="Password (min. 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
@@ -166,7 +166,7 @@ export default function Register() {
               <input
                 type={showPw ? "text" : "password"}
                 className="w-full h-12 rounded-xl border border-border bg-card pl-11 pr-4 text-base focus:outline-none focus:border-accent transition-colors"
-                placeholder="Powtórz hasło"
+                placeholder="Repeat password"
                 value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)}
                 autoComplete="new-password"
@@ -183,10 +183,10 @@ export default function Register() {
                   className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
                 />
                 <span className="text-xs leading-snug text-muted-foreground">
-                  Akceptuję{" "}
-                  <a href="/regulamin" target="_blank" className="text-accent underline">Regulamin</a>
-                  {" "}i{" "}
-                  <a href="/prywatnosc" target="_blank" className="text-accent underline">Politykę prywatności</a>
+                  I am at least 18 years old and I agree to the{" "}
+                  <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
+                  {" "}and{" "}
+                  <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>
                   {" "}<span className="text-destructive">*</span>
                 </span>
               </label>
@@ -198,7 +198,7 @@ export default function Register() {
                   className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
                 />
                 <span className="text-xs leading-snug text-muted-foreground">
-                  Chcę otrzymywać informacje o nowościach RaportON
+                  Send me occasional emails about RaportON updates and offers
                 </span>
               </label>
             </div>
@@ -212,7 +212,7 @@ export default function Register() {
               disabled={loading}
               className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Utwórz konto"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Create account"}
             </button>
           </form>
         </div>
@@ -220,9 +220,9 @@ export default function Register() {
         {/* Links */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            Masz już konto?{" "}
+            Already have an account?{" "}
             <Link to="/login" className="text-accent font-medium hover:underline">
-              Zaloguj się
+              Sign in
             </Link>
           </p>
         </div>

@@ -103,15 +103,15 @@ export function useAuth() {
   return ctx;
 }
 
-/** Map Supabase error messages to Polish */
+/** Map Supabase error messages to friendlier English */
 function mapAuthError(msg: string): string {
-  if (msg.includes("Invalid login credentials")) return "Nieprawidłowy email lub hasło";
-  if (msg.includes("User already registered")) return "Konto z tym emailem już istnieje";
-  if (msg.includes("Email not confirmed")) return "Potwierdź email - sprawdź skrzynkę";
-  if (msg.includes("Password should be at least")) return "Hasło musi mieć co najmniej 6 znaków";
-  if (msg.includes("Email rate limit exceeded")) return "Za dużo prób - spróbuj za chwilę";
-  if (msg.includes("For security purposes")) return "Za dużo prób - odczekaj chwilę i spróbuj ponownie";
-  if (msg.includes("Signup requires a valid password")) return "Podaj prawidłowe hasło";
-  if (msg.includes("New password should be different")) return "Nowe hasło musi się różnić od poprzedniego";
+  if (msg.includes("Invalid login credentials")) return "Incorrect email or password";
+  if (msg.includes("User already registered")) return "An account with this email already exists";
+  if (msg.includes("Email not confirmed")) return "Please confirm your email - check your inbox";
+  if (msg.includes("Password should be at least")) return "Password must be at least 6 characters";
+  if (msg.includes("Email rate limit exceeded")) return "Too many attempts - please try again shortly";
+  if (msg.includes("For security purposes")) return "Too many attempts - wait a moment and try again";
+  if (msg.includes("Signup requires a valid password")) return "Please enter a valid password";
+  if (msg.includes("New password should be different")) return "Your new password must be different from the old one";
   return msg;
 }

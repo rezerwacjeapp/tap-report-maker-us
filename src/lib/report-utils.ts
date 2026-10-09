@@ -10,8 +10,20 @@ export const todayISO = () => {
 
 export const isISODate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
 
-/** "Data następnego przeglądu", "Data następnego badania"… */
-export const isNextDateLabel = (label: string) => /następn/i.test(label);
+/**
+ * "2026-10-09" as a local date. `new Date("2026-10-09")` is UTC midnight, which in
+ * US time zones is still the previous day - so a report dated Oct 9 would show Oct 8.
+ */
+export function parseLocalDate(value: string): Date {
+  if (isISODate(value)) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(value);
+}
+
+/** "Next inspection date", "Next service due"… */
+export const isNextDateLabel = (label: string) => /\bnext\b/i.test(label);
 
 export function addMonthsISO(iso: string, months: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -31,10 +43,11 @@ export function daysBetween(fromISO: string, toISO: string): number {
   return Math.round((b - a) / 86_400_000);
 }
 
-export function formatDatePL(iso: string): string {
+/** ISO "2026-10-09" → US "10/09/2026". Anything else is returned unchanged. */
+export function formatDateUS(iso: string): string {
   if (!isISODate(iso)) return iso;
   const [y, m, d] = iso.split("-");
-  return `${d}.${m}.${y}`;
+  return `${m}/${d}/${y}`;
 }
 
 // ─── Upcoming inspections (from report history) ─────────────
@@ -71,7 +84,7 @@ export function computeReminders(history: ReportHistoryItem[], today = todayISO(
   const seen = new Set<string>();
   const out: InspectionReminder[] = [];
   for (const item of sorted) {
-    const address = findValueByLabel(item, /adres/i);
+    const address = findValueByLabel(item, /address/i);
     const key = `${norm(item.templateName)}|${norm(item.clientName)}|${norm(address)}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -82,9 +95,9 @@ export function computeReminders(history: ReportHistoryItem[], today = todayISO(
     if (daysLeft > horizonDays || daysLeft < -overdueDays) continue;
     out.push({
       reportId: item.id,
-      clientName: item.clientName && item.clientName !== "—" ? item.clientName : (address || item.filename),
+      clientName: item.clientName && item.clientName !== "—" && item.clientName !== "-" ? item.clientName : (address || item.filename),
       address,
-      phone: findValueByLabel(item, /telefon/i)?.replace(/[^\d+]/g, ""),
+      phone: findValueByLabel(item, /phone/i)?.replace(/[^\d+]/g, ""),
       templateName: item.templateName,
       dueDate,
       daysLeft,
@@ -96,21 +109,23 @@ export function computeReminders(history: ReportHistoryItem[], today = todayISO(
 export function reminderWhen(daysLeft: number): string {
   if (daysLeft < 0) {
     const n = -daysLeft;
-    return n === 1 ? "po terminie od wczoraj" : `po terminie ${n} dni`;
+    return n === 1 ? "1 day overdue" : `${n} days overdue`;
   }
-  if (daysLeft === 0) return "dziś";
-  if (daysLeft === 1) return "jutro";
-  return `za ${daysLeft} dni`;
+  if (daysLeft === 0) return "today";
+  if (daysLeft === 1) return "tomorrow";
+  return `in ${daysLeft} days`;
 }
 
-// ─── "Nowy na podstawie" — start a new report from an old one ───
+// ─── "New from this one" — start a new report from an old one ───
 
-const isProtocolNumber = (f: CustomFieldDef) => f.id === "f_protocol_nr" || /(numer|nr)\s+protoko/i.test(f.label);
-const isResult = (f: CustomFieldDef) => f.id === "f_result" || /^\s*(wynik|ocena)/i.test(f.label);
+const isProtocolNumber = (f: CustomFieldDef) =>
+  f.id === "f_protocol_nr" || /(report|protocol|work order|job|ticket|inspection)\s*(no\.?|number|#)/i.test(f.label);
+const isResult = (f: CustomFieldDef) =>
+  f.id === "f_result" || /^\s*(result|overall|assessment|pass\s*\/\s*fail|inspection result)/i.test(f.label);
 
 export interface ReuseResult {
   draft: ReportDraft;
-  /** Field ids filled from the old report — shown as "z poprzedniego" until edited. */
+  /** Field ids filled from the old report — shown as "from last report" until edited. */
   copiedIds: string[];
 }
 
@@ -120,7 +135,7 @@ export interface ReuseResult {
  *  - dates: protocol date = today, next-inspection date = empty, other dates copied
  *  - tables: rows kept with identifying columns — measured numbers and assessments are cleared
  *  - activities, photos, signatures, extra notes: start empty
- *  - "Zalecenia z poprzedniej kontroli" ← previous "Uwagi i zalecenia" (starter templates)
+ *  - "Previous recommendations" ← previous notes (starter templates: f_notes → f_prev_recommendations)
  */
 export function buildReuseDraft(fields: CustomFieldDef[], base: ReportDraft, old: Partial<ReportDraft>): ReuseResult {
   const oldValues = old.customFields || {};
@@ -147,9 +162,9 @@ export function buildReuseDraft(fields: CustomFieldDef[], base: ReportDraft, old
       const tv = parseTable(prev);
       if (!tv) continue;
       const cols = tableColumns(f, tv);
-      // keep identifiers (text, non-assessment choices like "Typ A/B/C"); drop measurements and assessments
+      // keep identifiers (text, non-assessment choices like "Type A/B/C"); drop measurements and assessments
       const keep = cols
-        .filter((c) => !c.kind || c.kind === "text" || (c.kind === "choice" && !/ocena|wynik|stan|sprawn/i.test(c.label)))
+        .filter((c) => !c.kind || c.kind === "text" || (c.kind === "choice" && !/result|assess|pass|fail|condition|status|\bok\b/i.test(c.label)))
         .map((c) => c.id);
       const rows: TableRow[] = filledRows(tv, f)
         .map((r) => {

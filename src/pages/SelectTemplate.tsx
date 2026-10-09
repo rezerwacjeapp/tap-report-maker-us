@@ -10,6 +10,7 @@ import {
 } from "@/lib/templates";
 import { toast } from "sonner";
 import { shareTemplate } from "@/lib/supabase-storage";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -28,8 +29,8 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 const BADGE_LABELS: Record<string, string> = {
-  Wind: "HVAC", Zap: "SEP", Home: "NIERUCH.", Flame: "GAZ",
-  ShieldAlert: "PPOŻ", Droplets: "HYDR.", Sun: "PV", Fan: "WENT.",
+  Wind: "HVAC", Zap: "ELECTRIC", Home: "PROPERTY", Flame: "GAS",
+  ShieldAlert: "FIRE", Droplets: "PLUMBING", Sun: "SOLAR", Fan: "VENT",
 };
 
 const INDUSTRY_EMOJI: Record<string, string> = {
@@ -82,10 +83,10 @@ export default function SelectTemplate() {
     const next = new Set(quickStartIds);
     if (next.has(id)) {
       next.delete(id);
-      toast.success("Usunięto z szybkiego startu");
+      toast.success("Removed from Quick start");
     } else {
       next.add(id);
-      toast.success("Dodano do szybkiego startu");
+      toast.success("Added to Quick start");
     }
     setQuickStartIds(next);
     saveQuickStartIds(next);
@@ -96,13 +97,13 @@ export default function SelectTemplate() {
     next.add(id);
     setHiddenStarters(next);
     saveHiddenStarters(next);
-    toast.success("Szablon ukryty");
+    toast.success("Template hidden");
   };
 
   const restoreAllStarters = () => {
     setHiddenStarters(new Set());
     saveHiddenStarters(new Set());
-    toast.success("Przywrócono wszystkie szablony");
+    toast.success("All templates restored");
   };
 
   const handleUseTemplate = (template: ReportTemplate) => {
@@ -118,16 +119,16 @@ export default function SelectTemplate() {
   };
 
   const handleDuplicateUser = async (template: ReportTemplate) => {
-    const dup = await duplicateTemplate(template, `${template.name} (kopia)`);
+    const dup = await duplicateTemplate(template, `${template.name} (copy)`);
     setUserTemplates(getUserTemplates());
-    toast.success(`Skopiowano jako "${dup.name}"`);
+    toast.success(`Copied as "${dup.name}"`);
   };
 
   const handleDelete = async (id: string) => {
     await deleteUserTemplate(id);
     setUserTemplates(getUserTemplates());
     setDeleteId(null);
-    toast.success("Szablon usunięty");
+    toast.success("Template deleted");
   };
 
   const handleCreateNew = () => {
@@ -139,21 +140,21 @@ export default function SelectTemplate() {
       const code = await shareTemplate(template);
       const url = `${window.location.origin}/t/${code}`;
       if (navigator.share) {
-        await navigator.share({ title: template.name, text: `Szablon: ${template.name}`, url });
+        await navigator.share({ title: template.name, text: `RaportON template: ${template.name}`, url });
       } else {
         await navigator.clipboard.writeText(url);
-        toast.success("Link skopiowany do schowka");
+        toast.success("Link copied to clipboard");
       }
     } catch (err: any) {
-      if (err?.name !== "AbortError") toast.error("Nie udało się udostępnić");
+      if (err?.name !== "AbortError") toast.error("Could not share the template");
     }
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
-        <h1 className="text-xl">Nowy raport</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Wybierz lub stwórz szablon</p>
+        <h1 className="text-xl">New report</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Pick a template or build your own</p>
       </header>
 
       <main className="flex-1 px-5 py-4 space-y-5 pb-8">
@@ -167,8 +168,8 @@ export default function SelectTemplate() {
               <Plus className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold">Stwórz własny szablon</h3>
-              <p className="text-xs text-muted-foreground">Wybierz klocki i zbuduj od zera</p>
+              <h3 className="text-sm font-semibold">Create your own template</h3>
+              <p className="text-xs text-muted-foreground">Pick building blocks and start from scratch</p>
             </div>
           </div>
         </button>
@@ -176,9 +177,9 @@ export default function SelectTemplate() {
         {/* Template request banner */}
         <div className="rounded-2xl glass-card p-4" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
           <p className="text-sm">
-            <strong>Potrzebujesz szablonu?</strong> Wyślij swój raport na{" "}
-            <span className="text-accent font-semibold">kontakt.raporton@gmail.com</span>{" "}
-            - przygotujemy szablon za Ciebie.
+            <strong>Need a template?</strong> Send us a sample of your report at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-accent font-semibold">{SUPPORT_EMAIL}</a>{" "}
+            and we'll build the template for you.
           </p>
         </div>
 
@@ -186,7 +187,7 @@ export default function SelectTemplate() {
         {userTemplates.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-              Twoje szablony
+              Your templates
             </p>
             <div className="rounded-2xl glass-card overflow-hidden divide-y divide-border/50">
               {userTemplates.map((template) => {
@@ -205,7 +206,7 @@ export default function SelectTemplate() {
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-medium truncate">{template.name}</h3>
                           <p className="text-[11px] text-muted-foreground">
-                            {template.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} pól • {countTileOptions(template)} czynności
+                            {template.fields.filter(f => !["tiles","photos","signature"].includes(f.type)).length} fields • {countTileOptions(template)} checklist items
                           </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -216,16 +217,16 @@ export default function SelectTemplate() {
                         <Star className="h-3.5 w-3.5" fill={quickStartIds.has(template.id) ? "currentColor" : "none"} />
                       </button>
                       <button onClick={() => handleEditTemplate(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
-                        <Pencil className="h-3.5 w-3.5" /> Edytuj
+                        <Pencil className="h-3.5 w-3.5" /> Edit
                       </button>
                       <button onClick={() => handleDuplicateUser(template)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
-                        <Copy className="h-3.5 w-3.5" /> Kopiuj
+                        <Copy className="h-3.5 w-3.5" /> Copy
                       </button>
                       <button onClick={() => handleShare(template)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-accent transition-colors border-r border-border">
-                        <Share2 className="h-3.5 w-3.5" /> Udostępnij
+                        <Share2 className="h-3.5 w-3.5" /> Share
                       </button>
                       <button onClick={() => setDeleteId(template.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors">
-                        <Trash2 className="h-3.5 w-3.5" /> Usuń
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
                       </button>
                     </div>
                   </div>
@@ -242,7 +243,7 @@ export default function SelectTemplate() {
             className="w-full flex items-center justify-between py-2"
           >
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-              Gotowe szablony branżowe
+              Ready-made trade templates
               {hiddenCount > 0 && <span className="ml-1 opacity-60">({visibleStarters.length}/{STARTER_TEMPLATES.length})</span>}
             </p>
             {showStarters
@@ -281,10 +282,10 @@ export default function SelectTemplate() {
                             <Star className="h-3.5 w-3.5" fill={quickStartIds.has(starter.id) ? "currentColor" : "none"} />
                           </button>
                           <button onClick={() => handleUseTemplate(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border-r border-border">
-                            Użyj bez zmian
+                            Use as is
                           </button>
                           <button onClick={() => handleDuplicateStarter(starter)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium text-accent hover:text-accent/80 transition-colors border-r border-border">
-                            <Pencil className="h-3.5 w-3.5" /> Kopiuj i dostosuj
+                            <Pencil className="h-3.5 w-3.5" /> Copy & customize
                           </button>
                           <button onClick={() => hideStarter(starter.id)} className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors">
                             <EyeOff className="h-3.5 w-3.5" />
@@ -295,7 +296,7 @@ export default function SelectTemplate() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4 mt-1">Wszystkie szablony ukryte</p>
+                <p className="text-sm text-muted-foreground text-center py-4 mt-1">All templates are hidden</p>
               )}
 
               {hiddenCount > 0 && (
@@ -303,7 +304,7 @@ export default function SelectTemplate() {
                   onClick={restoreAllStarters}
                   className="w-full flex items-center justify-center gap-1.5 mt-2.5 py-2.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors rounded-xl border border-border bg-card"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" /> Przywróć ukryte szablony ({hiddenCount})
+                  <RotateCcw className="h-3.5 w-3.5" /> Restore hidden templates ({hiddenCount})
                 </button>
               )}
             </>
@@ -315,15 +316,15 @@ export default function SelectTemplate() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Usunąć szablon?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this template?</AlertDialogTitle>
             <AlertDialogDescription>
-              Szablon zostanie usunięty na stałe. Wygenerowane wcześniej raporty pozostaną w historii.
+              The template will be deleted permanently. Reports you already generated stay in your history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>
-              Usuń
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

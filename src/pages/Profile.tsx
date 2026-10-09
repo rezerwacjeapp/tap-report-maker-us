@@ -6,22 +6,21 @@ import { getCloudProfile, saveCloudProfile, checkReportLimit } from "@/lib/supab
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 const FIELD_SUGGESTIONS = [
-  { label: "Telefon", placeholder: "np. +48 123 456 789" },
-  { label: "E-mail", placeholder: "np. biuro@firma.pl" },
-  { label: "Strona WWW", placeholder: "np. www.firma.pl" },
-  { label: "REGON", placeholder: "np. 123456789" },
-  { label: "Nr uprawnień", placeholder: "np. certyfikat F-gaz, SEP" },
-  { label: "Osoba kontaktowa", placeholder: "np. Jan Kowalski" },
+  { label: "Address", placeholder: "e.g. 123 Main St, Springfield, IL 62701" },
+  { label: "Phone", placeholder: "e.g. (555) 123-4567" },
+  { label: "License #", placeholder: "e.g. State contractor license number" },
+  { label: "Email", placeholder: "e.g. office@yourcompany.com" },
+  { label: "Website", placeholder: "e.g. www.yourcompany.com" },
+  { label: "Certifications", placeholder: "e.g. EPA 608 Universal, NATE" },
+  { label: "Contact person", placeholder: "e.g. John Smith" },
 ];
 
-/** "Został 1 dzień" / "Zostały 3 dni" / "Zostało 5 dni" */
+/** "1 day left" / "3 days left" */
 function trialLeftText(n: number): string {
-  if (n === 1) return "Został 1 dzień";
-  const lastTwo = n % 100;
-  const few = n % 10 >= 2 && n % 10 <= 4 && (lastTwo < 12 || lastTwo > 14);
-  return `${few ? "Zostały" : "Zostało"} ${n} dni`;
+  return n === 1 ? "1 day left" : `${n} days left`;
 }
 
 export default function Profile() {
@@ -37,7 +36,7 @@ export default function Profile() {
   useEffect(() => {
     getCloudProfile()
       .then((p) => setProfile(p))
-      .catch(() => toast.error("Nie udało się załadować profilu"))
+      .catch(() => toast.error("Could not load your profile"))
       .finally(() => setLoading(false));
     checkReportLimit()
       .then((info) => setPlanInfo({ plan: info.plan, trialDaysLeft: info.trialDaysLeft }))
@@ -48,7 +47,7 @@ export default function Profile() {
     setProfile(next);
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveCloudProfile(next).catch(() => toast.error("Błąd zapisu profilu"));
+      saveCloudProfile(next).catch(() => toast.error("Could not save your profile"));
     }, 500);
   };
 
@@ -61,7 +60,7 @@ export default function Profile() {
     if (!profile) return;
     const f: ProfileField = { id: `pf_${Date.now()}`, label, value: "" };
     update({ ...profile, fields: [...profile.fields, f] });
-    toast.success(`Dodano pole: ${label}`);
+    toast.success(`Field added: ${label}`);
   };
 
   const removeField = (id: string) => {
@@ -85,7 +84,7 @@ export default function Profile() {
 
     // Max 2MB raw file — we'll resize it anyway
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Logo jest za duże (max 2 MB). Wybierz mniejszy plik.");
+      toast.error("The logo is too large (max 2 MB). Please pick a smaller file.");
       e.target.value = "";
       return;
     }
@@ -108,7 +107,7 @@ export default function Profile() {
         const resized = canvas.toDataURL("image/png", 0.9);
         update({ ...profile, logo: resized });
       };
-      img.onerror = () => toast.error("Nie udało się wczytać pliku.");
+      img.onerror = () => toast.error("Could not read the file.");
       img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
@@ -129,8 +128,8 @@ export default function Profile() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="px-5 pt-8 pb-2">
-        <h1 className="text-xl">Profil firmy</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Dane widoczne w nagłówku PDF</p>
+        <h1 className="text-xl">Company profile</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Shown in the header of your PDFs</p>
       </header>
 
       <main className="flex-1 px-5 space-y-5 pb-8 pt-4">
@@ -147,17 +146,17 @@ export default function Profile() {
               <Upload className="h-7 w-7 text-muted-foreground" />
             )}
           </button>
-          <span className="text-[11px] text-muted-foreground">Logo firmy</span>
+          <span className="text-[11px] text-muted-foreground">Company logo</span>
           {profile.logo && (
             <button onClick={() => update({ ...profile, logo: null })} className="text-[11px] text-destructive hover:underline">
-              Usuń logo
+              Remove logo
             </button>
           )}
         </div>
 
         {/* Dynamic fields */}
         <div className="space-y-3">
-          <p className="text-[11px] text-muted-foreground">Kliknij etykietę aby ją zmienić.</p>
+          <p className="text-[11px] text-muted-foreground">Tap a label to rename it.</p>
           <div className="rounded-2xl glass-card overflow-hidden divide-y divide-border/50">
             {profile.fields.map((field, index) => (
               <div key={field.id} className="p-3.5 space-y-2">
@@ -174,7 +173,7 @@ export default function Profile() {
                     className="text-[11px] font-medium text-muted-foreground bg-transparent border-b border-dashed border-border outline-none flex-1 min-w-0 py-0.5 focus:border-accent focus:text-foreground transition-colors"
                     value={field.label}
                     onChange={(e) => updateField(field.id, { label: e.target.value })}
-                    placeholder="Wpisz nazwę pola..."
+                    placeholder="Field name..."
                     id={`label-${field.id}`}
                   />
                   {profile.fields.length > 1 && (
@@ -189,11 +188,11 @@ export default function Profile() {
                   onChange={(e) => updateField(field.id, { value: e.target.value })}
                   placeholder={
                     FIELD_SUGGESTIONS.find((s) => s.label === field.label)?.placeholder
-                    || (index === 0 ? "np. Serwis Klima Sp. z o.o." : "Wartość...")
+                    || (index === 0 ? "e.g. Smith HVAC Services LLC" : "Value...")
                   }
                 />
                 {index === 0 && (
-                  <p className="text-[10px] text-muted-foreground">Pierwsze pole = nazwa dużą czcionką w nagłówku PDF</p>
+                  <p className="text-[10px] text-muted-foreground">The first field is shown in large type at the top of the PDF</p>
                 )}
               </div>
             ))}
@@ -202,7 +201,7 @@ export default function Profile() {
 
         {/* Add field */}
         <div className="space-y-2">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dodaj pole</p>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Add a field</p>
           <div className="flex flex-wrap gap-1.5">
             {availableSuggestions.map((s) => (
               <button key={s.label} onClick={() => addField(s.label)}
@@ -221,20 +220,20 @@ export default function Profile() {
                 }, 50);
               }}
               className="rounded-lg border border-dashed border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-accent hover:text-foreground transition-all">
-              <Plus className="h-3 w-3 inline mr-1" /> Inne pole...
+              <Plus className="h-3 w-3 inline mr-1" /> Other field...
             </button>
           </div>
         </div>
 
         {/* Theme toggle */}
         <div className="space-y-2">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Motyw</p>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Theme</p>
           <ThemeToggle />
         </div>
 
-        <button onClick={() => { toast.success("Profil zapisany"); navigate("/"); }}
+        <button onClick={() => { toast.success("Profile saved"); navigate("/"); }}
           className="w-full h-12 rounded-xl bg-accent text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-          <Check className="h-5 w-5" /> Zapisano automatycznie
+          <Check className="h-5 w-5" /> Saved automatically
         </button>
 
         {/* Plan */}
@@ -244,26 +243,26 @@ export default function Profile() {
             <div className="rounded-2xl glass-card p-4 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold">
-                  {planInfo.plan === "solo" ? "Solo" : planInfo.plan === "trial" ? "Okres próbny" : "Free"}
+                  {planInfo.plan === "solo" ? "Solo" : planInfo.plan === "trial" ? "Free trial" : "Free"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {planInfo.plan === "solo"
-                    ? "Raporty bez znaku wodnego"
+                    ? "Reports without a watermark"
                     : planInfo.plan === "trial"
-                      ? `${trialLeftText(planInfo.trialDaysLeft ?? 0)}, potem PDF ze znakiem wodnym`
-                      : "Każdy PDF ma znak wodny „RaportON.pl”"}
+                      ? `${trialLeftText(planInfo.trialDaysLeft ?? 0)}, then PDFs carry a watermark`
+                      : "Every PDF carries a \"RaportON.com\" watermark"}
                 </p>
               </div>
               {planInfo.plan === "solo" ? (
                 <button onClick={() => navigate("/upgrade")} className="shrink-0 text-sm font-medium text-accent hover:underline">
-                  Szczegóły planu
+                  Plan details
                 </button>
               ) : (
                 <button
                   onClick={() => navigate("/upgrade")}
                   className="shrink-0 h-10 px-4 rounded-xl bg-accent text-white text-sm font-medium flex items-center gap-1.5 active:scale-[0.98] transition-transform"
                 >
-                  <Zap className="h-4 w-4" /> Przejdź na Solo
+                  <Zap className="h-4 w-4" /> Upgrade to Solo
                 </button>
               )}
             </div>
@@ -272,8 +271,13 @@ export default function Profile() {
 
         {/* Account */}
         <div className="space-y-3 pt-2">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Konto</p>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Account</p>
           {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+          <p className="text-[11px] text-muted-foreground">
+            To delete your account and data, email{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my RaportON account")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
+            {" "}from this address.
+          </p>
         </div>
       </main>
     </div>

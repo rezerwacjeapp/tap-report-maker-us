@@ -56,7 +56,7 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
       <div className="grid grid-cols-3 gap-2">
         {photos.map((photo, i) => (
           <div key={i} className="relative aspect-square rounded-lg border border-border overflow-hidden bg-muted">
-            <img src={photo} alt={`Zdjęcie ${i + 1}`} className="h-full w-full object-cover" />
+            <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
             <button
               onClick={() => remove(i)}
               className="absolute top-1 right-1 rounded-full bg-destructive p-1 text-destructive-foreground shadow-md"
@@ -71,22 +71,22 @@ export function PhotoGallery({ photos, onChange, max = 6 }: Props) {
             className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-card text-muted-foreground hover:border-accent hover:text-accent transition-colors"
           >
             <Camera className="h-6 w-6" />
-            <span className="text-[10px] font-medium">Zdjęcie</span>
+            <span className="text-[10px] font-medium">Photo</span>
           </button>
         )}
       </div>
       {photos.length < max && (
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" onClick={() => cameraRef.current?.click()}>
-            <Camera className="h-4 w-4 mr-1.5" /> Zrób zdjęcie
+            <Camera className="h-4 w-4 mr-1.5" /> Take photo
           </Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            <ImagePlus className="h-4 w-4 mr-1.5" /> Z galerii
+            <ImagePlus className="h-4 w-4 mr-1.5" /> From gallery
           </Button>
         </div>
       )}
       {photos.length > 0 && (
-        <p className="text-[10px] text-muted-foreground text-center">{photos.length}/{max} zdjęć</p>
+        <p className="text-[10px] text-muted-foreground text-center">{photos.length}/{max} photos</p>
       )}
     </div>
   );

@@ -3,8 +3,9 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { CompanyProfile, ReportDraft, TextStyle, CustomFieldDef } from "./storage";
 import { getTiles, getCustomFields } from "./storage";
 import { parseTable, tableColumns, filledRows, serializeTable, colsSnapshot } from "./table-field";
+import { todayISO, isISODate, formatDateUS } from "./report-utils";
 
-// Register Roboto font (includes Polish: ą, ę, ś, ź, ć, ł, ó, ż, ń)
+// Register Roboto font (pdfmake default, covers Latin-extended characters)
 try {
   const vfs = (pdfFonts as any)?.pdfMake?.vfs ?? pdfFonts;
   (pdfMake as any).vfs = vfs;
@@ -19,6 +20,9 @@ const COLORS = {
   white: "#ffffff",
   gray: "#6b7280",
 };
+
+/** US Letter (612 × 792 pt) minus 40 pt side margins. */
+const CONTENT_W = 532;
 
 /** Roboto in pdfmake has no "→" — swap it for a glyph it has, so the PDF shows no empty boxes. */
 const pdfSafe = (t: string) => (t || "").replace(/\u2192/g, "›");
@@ -114,9 +118,9 @@ export function buildReportDocument(
 ): { docDefinition: any; meta: GeneratedReport } {
   const customFields = options?.fields ?? getCustomFields();
   const allTiles = options?.tiles ?? getTiles();
-  const pdfTitle = options?.pdfTitle ?? "RAPORT SERWISOWY";
-  const templateName = options?.templateName ?? "Raport serwisowy";
-  const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Podpis klienta" }];
+  const pdfTitle = options?.pdfTitle ?? "SERVICE REPORT";
+  const templateName = options?.templateName ?? "Service report";
+  const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Customer signature" }];
   const showCompanyHeader = options?.showCompanyHeader !== false;
   const watermark = options?.watermark === true;
 
@@ -138,18 +142,18 @@ export function buildReportDocument(
     (f) => f.type === "date" && draft.customFields[f.id]?.trim()
   );
   const namepart = firstTextField
-    ? draft.customFields[firstTextField.id].replace(/\s+/g, "_").replace(/[^a-zA-Z0-9ąęśźćłóżńĄĘŚŹĆŁÓŻŃ_-]/g, "")
-    : "serwis";
+    ? draft.customFields[firstTextField.id].replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_-]/g, "")
+    : "service";
   const datepart = dateField
     ? draft.customFields[dateField.id]
-    : new Date().toISOString().split("T")[0];
-  const filename = `raport_${namepart}_${datepart}.pdf`;
+    : todayISO();
+  const filename = `report_${namepart || "service"}_${datepart}.pdf`;
 
   // Report number — empty (hidden or cleared in the form) means no number on the PDF
   const reportNum = (draft.reportNumber || "").trim();
 
   // Generation date for footer (frozen at generation time)
-  const generationDate = new Date().toLocaleDateString("pl-PL");
+  const generationDate = formatDateUS(todayISO());
 
   // --- Build PDF content ---
   const content: any[] = [];
@@ -174,7 +178,7 @@ export function buildReportDocument(
 
     headerCols.push({
       stack: [
-        { text: firstField?.value || "Firma", style: "companyName" },
+        { text: firstField?.value || "Company", style: "companyName" },
         ...restFields.map((f) => ({
           text: f.label ? `${f.label}: ${f.value}` : f.value,
           style: "companyDetail",
@@ -190,7 +194,7 @@ export function buildReportDocument(
   // Accent line
   content.push({
     canvas: [{
-      type: "line", x1: 0, y1: 0, x2: 515, y2: 0,
+      type: "line", x1: 0, y1: 0, x2: CONTENT_W, y2: 0,
       lineWidth: 2, lineColor: COLORS.accent,
     }],
     margin: [0, 0, 0, 12] as [number, number, number, number],
@@ -274,8 +278,10 @@ export function buildReportDocument(
 
     // --- DATA FIELDS (text, textarea, date, number) ---
     if (["text", "textarea", "date", "number"].includes(field.type)) {
-      const value = draft.customFields[field.id];
-      if (!value?.trim()) return;
+      const raw = draft.customFields[field.id];
+      if (!raw?.trim()) return;
+      // dates are stored as ISO "2026-10-09" and printed US-style "10/09/2026"
+      const value = isISODate(raw.trim()) ? formatDateUS(raw.trim()) : raw;
 
       if (field.type === "textarea") {
         pendingDataRows.push([
@@ -315,7 +321,7 @@ export function buildReportDocument(
         ...Array.from({ length: span - 1 }, () => ({ text: "", border: [false, false, false, false] })),
       ];
       const headerRow: any[] = [
-        { text: "Lp.", style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary, alignment: "center" as const },
+        { text: "#", style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary, alignment: "center" as const },
         ...cols.map((c) => ({
           text: c.label, style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
           alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
@@ -339,8 +345,8 @@ export function buildReportDocument(
           headerRows: 2,
           keepWithHeaderRows: 1,
           dontBreakRows: true,
-          // 515pt content width − 20pt "Lp." − cell paddings (4pt each side) and borders
-          widths: [20, ...tableWidths(cols, rows, cellSize, 515 - 20 - (cols.length + 1) * 8 - 2)],
+          // content width − 20pt "#" column − cell paddings (4pt each side) and borders
+          widths: [20, ...tableWidths(cols, rows, cellSize, CONTENT_W - 20 - (cols.length + 1) * 8 - 2)],
           body,
         },
         layout: {
@@ -362,8 +368,8 @@ export function buildReportDocument(
 
       const body: any[][] = [
         [
-          { text: "Lp.", style: "tableHeader", fillColor: COLORS.primary },
-          { text: "Opis czynności", style: "tableHeader", fillColor: COLORS.primary },
+          { text: "#", style: "tableHeader", fillColor: COLORS.primary },
+          { text: "Item", style: "tableHeader", fillColor: COLORS.primary },
           { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
         ],
       ];
@@ -381,7 +387,7 @@ export function buildReportDocument(
         }
 
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-        const statusText = state === "done" ? "TAK" : state === "fail" ? "NIE" : "nd.";
+        const statusText = state === "done" ? "YES" : state === "fail" ? "NO" : "N/A";
 
         body.push([
           { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
@@ -445,7 +451,7 @@ export function buildReportDocument(
 
         // First pair gets the section header attached
         if (i === 0) {
-          photoRow.unshift({ text: field.label || "Dokumentacja fotograficzna", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+          photoRow.unshift({ text: field.label || "Photos", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
         }
 
         content.push({
@@ -478,7 +484,7 @@ export function buildReportDocument(
 
       // Signature line — position via margin
       const lineWidth = 200;
-      const pageContentWidth = 515;
+      const pageContentWidth = CONTENT_W;
       const lineMarginLeft = sigAlign === "center" ? (pageContentWidth - lineWidth) / 2
         : sigAlign === "right" ? pageContentWidth - lineWidth : 0;
 
@@ -498,7 +504,7 @@ export function buildReportDocument(
   if (draft.additionalNotes?.trim()) {
     content.push({
       stack: [
-        { text: "Uwagi dodatkowe", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
+        { text: "Additional notes", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
         { text: draft.additionalNotes.trim(), style: "fieldValue" },
       ],
       unbreakable: true,
@@ -507,7 +513,7 @@ export function buildReportDocument(
   }
 
   // === DOCUMENT DEFINITION ===
-  // Diagonal watermark for free plan — multi-color "RaportON.pl" (ON in accent
+  // Diagonal watermark for free plan — multi-color "RaportON.com" (ON in accent
   // green), centered and rotated, drawn behind content on every page.
   const watermarkBackground = watermark
     ? (currentPage: number, pageSize: { width: number; height: number }) => {
@@ -521,21 +527,21 @@ export function buildReportDocument(
           `<text x="${cx}" y="${cy}" font-size="64" font-weight="bold" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" dominant-baseline="middle">` +
           `<tspan fill="${COLORS.primary}">Raport</tspan>` +
           `<tspan dx="0" fill="${COLORS.accent}">ON</tspan>` +
-          `<tspan dx="0" fill="${COLORS.primary}">.pl</tspan>` +
+          `<tspan dx="0" fill="${COLORS.primary}">.com</tspan>` +
           `</text></g></svg>`;
         return { svg, width: w, height: h, absolutePosition: { x: 0, y: 0 } };
       }
     : undefined;
 
   const docDefinition: any = {
-    pageSize: "A4",
+    pageSize: "LETTER",
     pageMargins: [40, 40, 40, 55],
     background: watermarkBackground,
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `Wygenerowano: ${generationDate} • ${profileFields[0]?.value || "RaportON"}`, style: "footer", alignment: "left" as const },
-        { text: `Strona ${currentPage} z ${pageCount}`, style: "footer", alignment: "right" as const },
+        { text: `Generated: ${generationDate} • ${profileFields[0]?.value || "RaportON"}`, style: "footer", alignment: "left" as const },
+        { text: `Page ${currentPage} of ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
     }),
@@ -556,7 +562,8 @@ export function buildReportDocument(
 
   // Build metadata for report history
   const clientField = customFields.find(
-    (f) => f.id === "df_client" || f.id.includes("_client") || f.label.toLowerCase().includes("klient") || f.label.toLowerCase().includes("zleceniodawca")
+    (f) => (f.type === "text" || f.type === "textarea") &&
+      (f.id === "df_client" || f.id.includes("_client") || /customer|client/i.test(f.label))
   );
   const clientName = clientField ? draft.customFields[clientField.id] || "—" : "—";
 
@@ -611,7 +618,7 @@ export function generateReport(
   return meta;
 }
 
-/** Builds the PDF in memory — for the "Wyślij / Pobierz" sheet. */
+/** Builds the PDF in memory — for the "Send / Download" sheet. */
 export async function generateReportFile(
   profile: CompanyProfile,
   draft: ReportDraft,

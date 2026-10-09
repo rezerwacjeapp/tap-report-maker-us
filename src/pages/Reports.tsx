@@ -11,6 +11,7 @@ const loadPdf = () => import("@/lib/pdf-generator");
 import { ReportReadySheet } from "@/components/ReportReadySheet";
 import { parseTable, tableColumns, filledRows, tableSearchText, type TableValue } from "@/lib/table-field";
 import { prepareReuse } from "@/lib/reuse-report";
+import { isISODate, formatDateUS, parseLocalDate } from "@/lib/report-utils";
 import {
   getCloudReportHistory, removeCloudReport, deleteCloudSnapshot,
   getCloudSnapshot, getCloudProfile, checkReportLimit, getCloudReportSignatures,
@@ -40,7 +41,7 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 const BADGE_LABELS: Record<string, string> = {
-  Wind: "HVAC", Zap: "SEP", Home: "NIERUCH.", Flame: "GAZ", ShieldAlert: "PPOŻ",
+  Wind: "HVAC", Zap: "ELECTRIC", Home: "PROPERTY", Flame: "GAS", ShieldAlert: "FIRE",
 };
 
 function getTemplateIcon(templateName: string) {
@@ -62,7 +63,7 @@ export default function Reports() {
   useEffect(() => {
     getCloudReportHistory()
       .then(setReports)
-      .catch(() => toast.error("Nie udało się załadować historii"))
+      .catch(() => toast.error("Could not load your report history"))
       .finally(() => setLoading(false));
     loadPdf().catch(() => {});
   }, []);
@@ -84,6 +85,7 @@ export default function Reports() {
       r.clientName.toLowerCase().includes(q) ||
       r.filename.toLowerCase().includes(q) ||
       r.date.includes(q) ||
+      formatDateUS(r.date).includes(q) ||
       r.templateName.toLowerCase().includes(q) ||
       Object.values(r.customFields).some((v) => typeof v === "string" && tableSearchText(v).toLowerCase().includes(q))
     );
@@ -96,13 +98,13 @@ export default function Reports() {
     setReports((prev) => prev.filter((r) => r.id !== id));
     setDeleteId(null);
     if (expandedId === id) setExpandedId(null);
-    toast.success("Raport usunięty z historii");
+    toast.success("Report deleted from history");
   };
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("pl-PL", {
-        day: "numeric", month: "short", year: "numeric",
+      return parseLocalDate(dateStr).toLocaleDateString("en-US", {
+        month: "short", day: "numeric", year: "numeric",
       });
     } catch { return dateStr; }
   };
@@ -145,30 +147,30 @@ export default function Reports() {
         ]);
         const { draft, options } = historyTemplateOptions({ ...report, signatures }, watermark);
         result = await generateReportFile(profile, draft, options);
-        toast("Ten raport nie ma zapisanej kopii zdjęć i podpisów - PDF odtworzony z samych danych.");
+        toast("This report has no saved copy of its photos and signatures - the PDF was rebuilt from the data only.");
       }
       setReady({
         blob: result.blob,
         filename: report.filename || result.meta.filename,
-        subtitle: [report.clientName !== "—" ? report.clientName : "", report.templateName].filter(Boolean).join(" • "),
+        subtitle: [report.clientName !== "—" && report.clientName !== "-" ? report.clientName : "", report.templateName].filter(Boolean).join(" • "),
       });
     } catch {
-      toast.error("Nie udało się przygotować PDF");
+      toast.error("Could not prepare the PDF");
     } finally {
       setBusyId(null);
     }
   };
 
-  /** "Nowy na podstawie" — next inspection for the same client/device. */
+  /** "New from this one" — next inspection for the same client/device. */
   const startFrom = async (report: ReportHistoryItem) => {
     if (busyId) return;
     setBusyId(report.id);
     try {
       const url = await prepareReuse(report);
       if (url) navigate(url);
-      else toast.error("Szablon tego raportu już nie istnieje - nie da się skopiować danych.");
+      else toast.error("The template for this report no longer exists - its data can't be copied.");
     } catch {
-      toast.error("Nie udało się wczytać raportu");
+      toast.error("Could not load the report");
     } finally {
       setBusyId(null);
     }
@@ -179,8 +181,8 @@ export default function Reports() {
       <header className="px-5 pt-8 pb-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl">Historia raportów</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{reports.length} raportów</p>
+            <h1 className="text-xl">Report history</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{reports.length} {reports.length === 1 ? "report" : "reports"}</p>
           </div>
         </div>
       </header>
@@ -192,7 +194,7 @@ export default function Reports() {
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <input
               className="flex-1 bg-transparent text-sm focus:outline-none"
-              placeholder="Szukaj po kliencie, dacie, szablonie..."
+              placeholder="Search by customer, date, template..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -212,19 +214,19 @@ export default function Reports() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted mb-4">
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-base font-medium">Brak raportów</p>
-            <p className="text-sm text-muted-foreground mt-1">Wygenerowane raporty pojawią się tutaj</p>
+            <p className="text-base font-medium">No reports yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Your generated reports will show up here</p>
             <button
               onClick={() => navigate("/select-template")}
               className="mt-6 h-10 px-5 rounded-xl bg-accent text-white text-sm font-medium active:scale-[0.98] transition-transform"
             >
-              Utwórz pierwszy raport
+              Create your first report
             </button>
           </div>
         )}
 
         {filtered.length === 0 && reports.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">Brak wyników dla „{search}"</p>
+          <p className="text-center text-sm text-muted-foreground py-8">No results for "{search}"</p>
         )}
 
         <div className="space-y-2">
@@ -244,7 +246,7 @@ export default function Reports() {
                     <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium truncate">
-                        {report.clientName !== "—" ? report.clientName : report.filename}
+                        {report.clientName && report.clientName !== "—" && report.clientName !== "-" ? report.clientName : report.filename}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -264,11 +266,11 @@ export default function Reports() {
                           typeof report.signedCount === "number" ? (
                             <span className="flex items-center gap-1">
                               <PenTool className="h-3 w-3" />
-                              {report.signedCount}/{Object.keys(report.signatureLabels).length} podp.
+                              {report.signedCount}/{Object.keys(report.signatureLabels).length} signed
                             </span>
                           ) : null
                         ) : report.signedCount ? (
-                          <span className="flex items-center gap-1"><PenTool className="h-3 w-3" />Podpis</span>
+                          <span className="flex items-center gap-1"><PenTool className="h-3 w-3" />Signed</span>
                         ) : null}
                       </div>
                     </div>
@@ -289,7 +291,7 @@ export default function Reports() {
                   <div className="px-4 pb-4 space-y-4 border-t border-border pt-3">
                     {filledFields.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Dane raportu</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Report details</p>
                         <div className="space-y-1.5">
                           {filledFields.map(({ label, value, table }) => table ? (
                             <div key={label} className="space-y-1">
@@ -312,7 +314,7 @@ export default function Reports() {
                           ) : (
                             <div key={label} className="flex gap-2">
                               <span className="text-[11px] text-muted-foreground shrink-0 w-28 pt-0.5">{label}:</span>
-                              <span className="text-sm break-words">{value}</span>
+                              <span className="text-sm break-words">{isISODate(value) ? formatDateUS(value) : value}</span>
                             </div>
                           ))}
                         </div>
@@ -321,7 +323,7 @@ export default function Reports() {
 
                     {tileLabels.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Wykonane czynności ({tileLabels.length})</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Completed items ({tileLabels.length})</p>
                         <div className="space-y-1">
                           {tileLabels.map((label, i) => (
                             <div key={i} className="flex items-center gap-2">
@@ -335,15 +337,15 @@ export default function Reports() {
 
                     {report.signatureLabels && Object.keys(report.signatureLabels).length > 0 ? (
                       <div className="space-y-2">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Signatures</p>
                         <div className="flex flex-wrap gap-4">
                           {Object.entries(report.signatureLabels).map(([sigId, sigLabel]) => {
                             const sigData = signaturesById[report.id]?.[sigId];
                             return (
                               <div key={sigId} className="flex flex-col items-start gap-1">
-                                <span className="text-[11px] text-muted-foreground">{sigLabel || "Podpis"}</span>
+                                <span className="text-[11px] text-muted-foreground">{sigLabel || "Signature"}</span>
                                 {sigData ? (
-                                  <img src={sigData} alt={sigLabel || "Podpis"} className="h-14 w-auto border border-border rounded bg-white" />
+                                  <img src={sigData} alt={sigLabel || "Signature"} className="h-14 w-auto border border-border rounded bg-white" />
                                 ) : (
                                   <div className="h-14 w-32 border border-border rounded bg-white" />
                                 )}
@@ -354,12 +356,12 @@ export default function Reports() {
                       </div>
                     ) : Object.values(signaturesById[report.id] || {}).some((v) => !!v) ? (
                       <div className="space-y-2">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Podpisy</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Signatures</p>
                         <div className="flex flex-wrap gap-4">
                           {Object.entries(signaturesById[report.id] || {}).filter(([, v]) => !!v).map(([sigId, sigData]) => (
                             <div key={sigId} className="flex flex-col items-start gap-1">
-                              <span className="text-[11px] text-muted-foreground">Podpis</span>
-                              <img src={sigData!} alt="Podpis" className="h-14 w-auto border border-border rounded bg-white" />
+                              <span className="text-[11px] text-muted-foreground">Signature</span>
+                              <img src={sigData!} alt="Signature" className="h-14 w-auto border border-border rounded bg-white" />
                             </div>
                           ))}
                         </div>
@@ -368,8 +370,8 @@ export default function Reports() {
 
                     {report.photosCount > 0 && (
                       <div className="space-y-1">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Zdjęcia</p>
-                        <p className="text-xs text-muted-foreground">{report.photosCount} {report.photosCount === 1 ? "zdjęcie zapisane" : "zdjęć zapisanych"} w PDF</p>
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Photos</p>
+                        <p className="text-xs text-muted-foreground">{report.photosCount} {report.photosCount === 1 ? "photo" : "photos"} saved in the PDF</p>
                       </div>
                     )}
 
@@ -380,9 +382,9 @@ export default function Reports() {
                         size="sm"
                         disabled={busyId === report.id}
                         onClick={(e) => { e.stopPropagation(); startFrom(report); }}
-                        title="Kolejny przegląd u tego klienta - dane klienta i urządzenia będą już wpisane"
+                        title="Next visit for this customer - customer and equipment details are filled in for you"
                       >
-                        <CopyPlus className="h-3.5 w-3.5 mr-1.5" /> Nowy na podstawie
+                        <CopyPlus className="h-3.5 w-3.5 mr-1.5" /> New from this one
                       </Button>
                       <Button
                         variant="accent"
@@ -405,12 +407,12 @@ export default function Reports() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Usunąć raport?</AlertDialogTitle>
-            <AlertDialogDescription>Raport zostanie usunięty z historii. Wcześniej pobrany plik PDF pozostanie na urządzeniu.</AlertDialogDescription>
+            <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+            <AlertDialogDescription>The report will be removed from your history. Any PDF you already downloaded stays on your device.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>Usuń</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -420,7 +422,7 @@ export default function Reports() {
         blob={ready?.blob ?? null}
         filename={ready?.filename ?? ""}
         subtitle={ready?.subtitle}
-        closeLabel="Zamknij"
+        closeLabel="Close"
         onClose={() => setReady(null)}
       />
     </div>

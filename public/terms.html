@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service | RaportON</title>
+  <meta name="description" content="Terms of Service for RaportON, the app for service and inspection reports from your phone.">
+  <link rel="canonical" href="https://raporton.com/terms">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --primary: #0f172a; --text: #334155; --text-muted: #64748b; --accent: #10b981; --accent-ink: #047857; --accent-hover: #059669; --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.7); }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', system-ui, sans-serif; color: var(--text); background: #f0f2f5; -webkit-font-smoothing: antialiased; overflow-x: hidden; line-height: 1.7; }
+    .mesh-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 50%, #f5f7fa 100%); }
+    .mesh-bg .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: drift 20s ease-in-out infinite alternate; }
+    .mesh-bg .blob:nth-child(1) { width: 500px; height: 500px; background: #dbeafe; top: -10%; left: -5%; }
+    .mesh-bg .blob:nth-child(2) { width: 400px; height: 400px; background: #d1fae5; bottom: -10%; right: -5%; animation-delay: -8s; }
+    @keyframes drift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,-10px) scale(1.02); } }
+    @media (prefers-reduced-motion: reduce) { .mesh-bg .blob { animation: none; } html { scroll-behavior: auto; } }
+
+    header { position: sticky; top: 0; z-index: 50; padding: 1rem 1.5rem; }
+    .header-bar { max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 0.6rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+    .brand { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.03em; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: .45rem; }
+    .brand .on { color: var(--accent); }
+    .back-link { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+    .back-link:hover { color: var(--primary); }
+
+    main { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem 4rem; }
+    .content-card { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 2rem; padding: 3rem; box-shadow: 0 8px 32px rgba(0,0,0,0.04); }
+    @media (max-width: 640px) { main { margin-top: 1.5rem; padding: 0 1rem 3rem; } .content-card { padding: 1.5rem 1.25rem; border-radius: 1.5rem; } }
+
+    h1 { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.03em; margin-bottom: 0.5rem; line-height: 1.2; }
+    .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-top: 2.5rem; margin-bottom: 0.75rem; scroll-margin-top: 6rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: var(--primary); margin-top: 1.25rem; margin-bottom: 0.4rem; }
+    p, li, td, th { font-size: 0.95rem; color: var(--text); font-weight: 300; }
+    strong { font-weight: 600; color: var(--primary); }
+    ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    ol li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; list-style: disc; }
+    ul li { margin-bottom: 0.4rem; }
+    p { margin-bottom: 1rem; }
+    a { color: var(--accent-ink); }
+    .caps { text-transform: none; font-weight: 400; letter-spacing: 0.01em; }
+    .notice { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.22); border-radius: 1rem; padding: 1rem 1.25rem; margin-bottom: 2rem; }
+    .notice p, .notice li { font-size: 0.92rem; }
+    .notice p:last-child, .notice ul:last-child { margin-bottom: 0; }
+    .toc { columns: 2; column-gap: 2rem; padding-left: 1.25rem; margin-bottom: 1.5rem; }
+    .toc li { font-size: 0.88rem; margin-bottom: 0.25rem; break-inside: avoid; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .table-wrap { overflow-x: auto; margin-bottom: 1rem; border: 1px solid rgba(226,232,240,0.9); border-radius: 0.85rem; background: rgba(255,255,255,0.5); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(226,232,240,0.9); }
+    th { font-weight: 600; color: var(--primary); background: rgba(241,245,249,0.8); }
+    tr:last-child td { border-bottom: 0; }
+    address { font-style: normal; }
+
+    footer { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; border-top: 1px solid rgba(226,232,240,0.3); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+    footer a:hover { color: var(--primary); }
+    footer .links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+<div class="mesh-bg" aria-hidden="true"><div class="blob"></div><div class="blob"></div></div>
+
+<header>
+  <div class="header-bar">
+    <a href="/" class="brand" aria-label="RaportON - home"><img src="/favicon.svg" alt="" width="24" height="24"><span>Raport<span class="on">ON</span></span></a>
+    <a href="/" class="back-link">← Home</a>
+  </div>
+</header>
+
+<main>
+  <div class="content-card">
+    <h1>Terms of Service</h1>
+    <p class="subtitle">Last updated: October 9, 2026</p>
+
+    <div class="notice">
+      <p><strong>Please read these Terms carefully.</strong> Among other things, they explain that you are responsible for your own work and the reports you create (Section 8), limit our liability (Sections 13 and 14), and provide that disputes are resolved individually under Polish law in the courts of Poland, with class-action and jury-trial waivers (Section 16). Solo subscriptions renew automatically every month until you cancel (Section 5).</p>
+    </div>
+
+    <ol class="toc">
+      <li><a href="#who">Who we are and what these Terms cover</a></li>
+      <li><a href="#eligibility">Eligibility and business use</a></li>
+      <li><a href="#account">Your account</a></li>
+      <li><a href="#plans">Plans and pricing</a></li>
+      <li><a href="#subscriptions">Subscriptions, automatic renewal and cancellation</a></li>
+      <li><a href="#content">Your content</a></li>
+      <li><a href="#data-processing">Data processing terms (your customers' data)</a></li>
+      <li><a href="#responsibility">Templates, compliance and your professional responsibility</a></li>
+      <li><a href="#acceptable-use">Acceptable use</a></li>
+      <li><a href="#third-parties">Third-party services</a></li>
+      <li><a href="#ip">Our intellectual property</a></li>
+      <li><a href="#availability">Availability and changes to the Service</a></li>
+      <li><a href="#disclaimers">Disclaimers</a></li>
+      <li><a href="#liability">Limitation of liability</a></li>
+      <li><a href="#indemnification">Indemnification</a></li>
+      <li><a href="#disputes">Disputes, governing law and courts</a></li>
+      <li><a href="#termination">Suspension and termination</a></li>
+      <li><a href="#changes">Changes to these Terms</a></li>
+      <li><a href="#general">General</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ol>
+
+    <h2 id="who">1. Who we are and what these Terms cover</h2>
+    <ol>
+      <li>RaportON (the “<strong>Service</strong>”) is a web application available at raporton.com that lets you create service, maintenance and inspection reports and other documents on your phone or computer and export them as PDF files.</li>
+      <li>The Service is operated by Andrzej Król, an individual conducting an unregistered business activity under Article 5(1) of the Polish Entrepreneurs' Law, address: ul. Słoneczna 10a, 33-383 Tylicz, Poland, email: <a href="mailto:support@raporton.com">support@raporton.com</a> (“<strong>RaportON</strong>”, “<strong>we</strong>”, “<strong>us</strong>”, “<strong>our</strong>”).</li>
+      <li>These Terms of Service (the “<strong>Terms</strong>”) are a binding agreement between you and us. By creating an account, checking the box to accept these Terms, or using the Service, you agree to these Terms and to our <a href="/privacy">Privacy Policy</a>. If you don't agree, don't use the Service.</li>
+      <li>If you use the Service on behalf of a company or other organization, “you” means that organization, and you confirm that you are authorized to accept these Terms on its behalf.</li>
+    </ol>
+
+    <h2 id="eligibility">2. Eligibility and business use</h2>
+    <ol>
+      <li>You must be at least 18 years old and able to enter into a binding contract.</li>
+      <li>The Service is designed for professional use by contractors, technicians, inspectors, property managers and other businesses. You agree to use it for your trade, business or profession and not as a consumer for personal, family or household purposes.</li>
+      <li>You may not use the Service if you are located in a country subject to comprehensive U.S. or EU sanctions, or if you appear on a U.S. or EU list of sanctioned or restricted persons.</li>
+    </ol>
+
+    <h2 id="account">3. Your account</h2>
+    <ol>
+      <li>You need an account to use the Service. You can sign up with an email address and password or with a Google account. Give us accurate information and keep it up to date.</li>
+      <li>Keep your login details confidential. You are responsible for all activity under your account. Tell us right away at <a href="mailto:support@raporton.com">support@raporton.com</a> if you suspect unauthorized use.</li>
+      <li>An account is for one person. Don't share it or let others use it.</li>
+    </ol>
+
+    <h2 id="plans">4. Plans and pricing</h2>
+    <ol>
+      <li><strong>Free trial.</strong> For the first 7 days after you create your account, the PDFs you generate don't carry a watermark. The trial doesn't require payment details and does not turn into a paid subscription automatically.</li>
+      <li><strong>Free plan.</strong> After the trial you can keep using the Service for free and create an unlimited number of reports. Every PDF generated on the Free plan carries a “RaportON.com” watermark.</li>
+      <li><strong>Solo plan.</strong> Solo is a paid subscription. While it is active, your PDFs are generated without the watermark and your support requests are answered first. The price is <strong>US $9.99 per month</strong>, plus any applicable sales or similar taxes. The current price is always shown in the app before you subscribe.</li>
+      <li>We may change plans, features and prices. We'll give you at least 30 days' notice by email or in the app before a price increase affects your subscription; the new price applies from your first billing period after the notice period ends. If you don't agree, you can cancel before it takes effect.</li>
+    </ol>
+
+    <h2 id="subscriptions">5. Subscriptions, automatic renewal and cancellation</h2>
+    <ol>
+      <li><strong>Automatic renewal.</strong> Solo is billed monthly in advance and <strong>renews automatically every month at the then-current price until you cancel</strong>. By subscribing, you authorize us and our payment processor to charge your payment method every month until you cancel.</li>
+      <li><strong>Payments.</strong> Payments are processed by Stripe. We don't receive or store your full card number. Your payment is also subject to Stripe's terms. You'll receive an email receipt for each charge.</li>
+      <li><strong>How to cancel.</strong> You can cancel at any time online in the app (<em>Profile → Plan details → Manage subscription</em>) or by emailing <a href="mailto:support@raporton.com">support@raporton.com</a> from your account email address. Cancellation takes effect at the end of your current billing period: you keep Solo until then and you won't be charged again.</li>
+      <li><strong>Refunds.</strong> Except where required by law or stated otherwise in these Terms, payments are non-refundable, and we don't give refunds or credits for partial months or unused features. If you were charged by mistake, contact us within 60 days and we'll fix it.</li>
+      <li><strong>Failed payments.</strong> If a payment fails, Stripe may try again. If it keeps failing, your account moves to the Free plan (PDFs carry the watermark again) until a payment succeeds.</li>
+      <li><strong>Taxes.</strong> Prices don't include taxes unless stated otherwise. You are responsible for any sales, use, value-added or similar taxes that apply, which may be calculated and collected at checkout.</li>
+    </ol>
+
+    <h2 id="content">6. Your content</h2>
+    <ol>
+      <li>“<strong>Your content</strong>” means everything you or people using your account add to the Service: company information and logo, templates, customer details, equipment data, readings, notes, photos, signatures, drafts, and the reports and PDFs you generate.</li>
+      <li><strong>You own your content.</strong> You give us a worldwide, non-exclusive, royalty-free license to host, store, copy, process, transmit and display your content only as needed to operate, secure and support the Service for you, as described in the Privacy Policy. This license ends when your content is deleted from our systems (copies in backups are deleted on their normal schedule).</li>
+      <li>You are responsible for your content. You confirm that you have all rights, permissions and consents needed to add it to the Service and to let us process it as described, including personal information about your customers, their employees or tenants, photos of their property and signatures. Giving them any notices required by law and obtaining any required consents is your responsibility.</li>
+      <li><strong>Keep your own copies.</strong> The Service is not a records-retention or archiving system. Download and keep a copy of every report you need, especially records you are legally required to keep (for example refrigerant, fire-protection or backflow test records). We are not responsible for any loss of your content (see Sections 13 and 14).</li>
+      <li>We don't monitor your content, but we may remove content or suspend an account if we reasonably believe it violates these Terms or the law.</li>
+      <li>If you send us ideas or suggestions, we may use them freely without any obligation to you.</li>
+    </ol>
+
+    <h2 id="data-processing">7. Data processing terms (your customers' data)</h2>
+    <ol>
+      <li><strong>Roles.</strong> For personal information contained in your content (“<strong>Customer Data</strong>”), you are the controller (or “business”) and we are your processor (or “service provider”). Subject matter and duration: providing the Service for as long as you have an account. Nature and purpose: hosting, storing, generating PDFs from, displaying and transmitting your content at your direction. Types of data: contact details, addresses, signatures, photos and any other information you enter. Data subjects: your customers, their staff, tenants and anyone else you include in your reports.</li>
+      <li><strong>Our commitments.</strong> We will: (a) process Customer Data only to provide the Service and on your documented instructions (your use of the Service and these Terms are your instructions), unless the law requires otherwise; (b) not sell or share Customer Data, use it for advertising, or combine it with other data for our own purposes; (c) make sure anyone we authorize to access it is bound by confidentiality; (d) apply the security measures described in the Privacy Policy; (e) use only the sub-processors listed in the Privacy Policy, under written terms that protect the data at least as well as these Terms, and announce new sub-processors by updating the Privacy Policy, so you can object or stop using the Service; (f) reasonably help you, taking into account the nature of the processing, to respond to requests from individuals and to meet your security, breach-notification and impact-assessment obligations; (g) notify you without undue delay after becoming aware of a personal data breach affecting Customer Data; (h) delete Customer Data when you delete it or your account, subject to backups and legal retention duties; and (i) make available the information reasonably needed to demonstrate compliance with this Section and allow reasonable audits at your cost, on 30 days' notice and no more than once a year, which we may satisfy with written answers and our providers' certifications.</li>
+      <li><strong>Transfers.</strong> Customer Data is stored in the United States. Where the GDPR applies to a transfer, it is covered by the safeguards described in the Privacy Policy.</li>
+    </ol>
+
+    <h2 id="responsibility">8. Templates, compliance and your professional responsibility</h2>
+    <ol>
+      <li><strong>RaportON is a documentation tool.</strong> It does not perform, supervise, verify, approve or certify any inspection, test, installation, maintenance or repair, and it does not decide whether any equipment, system or building is safe, compliant or fit for use. Those decisions are yours alone.</li>
+      <li>Templates, checklists, field labels, sample text, references to codes, standards or regulations, reminders and any other content we provide are general information for your convenience. They may be incomplete, out of date or not applicable to your job. They are <strong>not legal, engineering, safety or code-compliance advice</strong>, and they don't reflect the requirements of your state, county, city or other authority having jurisdiction (AHJ), equipment manufacturers, insurers or your contracts.</li>
+      <li>You alone are responsible for: (a) the work you perform and its compliance with all applicable laws, codes and standards (for example EPA, OSHA, NFPA, NEC and local codes) and with license, permit and certification requirements; (b) checking that every template and report you use meets the requirements that apply to you, and adapting it where needed; (c) the accuracy, completeness and truthfulness of every report you create, sign or send; and (d) keeping records for as long as the law requires.</li>
+      <li>You must not use the Service to create false, misleading or fraudulent records, or reports about work that wasn't performed.</li>
+      <li><strong>Reports are your documents.</strong> Reports and PDFs created with the Service are made and issued by you, not by us. We are not a party to any agreement between you and your customers, and we have no responsibility for your work, prices or payments or for any dispute between you and your customers or any authority.</li>
+      <li><strong>Signatures.</strong> The Service lets you capture an image of a handwritten signature on a screen. We don't verify the identity, authority or intent of the person signing, and we don't guarantee that a signed report meets the requirements of the U.S. ESIGN Act, state electronic transactions laws (UETA) or any other rule for your purpose. Where the law requires a consumer's consent to electronic records or signatures, obtaining it is your responsibility.</li>
+      <li><strong>Reminders and automatic features.</strong> Upcoming-inspection reminders, automatic numbering, date shortcuts and similar features are conveniences. They may be inaccurate or fail, so don't rely on them as your only way to track deadlines.</li>
+    </ol>
+
+    <h2 id="acceptable-use">9. Acceptable use</h2>
+    <p>You agree not to:</p>
+    <ul>
+      <li>break any law or infringe anyone's rights;</li>
+      <li>upload malware, or content that is illegal, defamatory or that you have no right to share;</li>
+      <li>try to gain unauthorized access to the Service, other accounts or our systems, or probe, scan or test their vulnerability;</li>
+      <li>interfere with or overload the Service, or access it with bots, scrapers or other automated means;</li>
+      <li>copy, modify, reverse engineer, resell or sublicense the Service, except as the law expressly allows;</li>
+      <li>use the Service to build a competing product;</li>
+      <li>share your account or let others use it; or</li>
+      <li>use the Service to send spam or unlawful messages.</li>
+    </ul>
+    <p>When you share a template by link, anyone with the link can view and import it. Don't put confidential information into shared templates.</p>
+
+    <h2 id="third-parties">10. Third-party services</h2>
+    <p>The Service relies on third-party services such as Stripe (payments), Google (sign-in) and the apps on your device that you use to send PDFs (text messages, email, WhatsApp). Your use of them is subject to their own terms, and we are not responsible for them.</p>
+
+    <h2 id="ip">11. Our intellectual property</h2>
+    <ol>
+      <li>The Service, including its software, design, templates, name and logo, belongs to us or our licensors and is protected by law. We give you a limited, non-exclusive, non-transferable, revocable right to use the Service under these Terms while your account is active. You may use, modify and share the templates inside the Service, and use the reports you generate with them for your business. All rights not expressly granted are reserved.</li>
+      <li>If you believe that content on the Service infringes your copyright, email <a href="mailto:support@raporton.com">support@raporton.com</a> with the details and we will respond.</li>
+    </ol>
+
+    <h2 id="availability">12. Availability and changes to the Service</h2>
+    <ol>
+      <li>We work to keep the Service running, but we provide it “as available”. It may be interrupted for maintenance or updates, by failures of our providers or the internet, or for reasons beyond our control. We don't guarantee any particular uptime, and we don't provide a service level agreement.</li>
+      <li>We may change, add or remove features. If we discontinue the Service entirely, we will give you at least 30 days' notice where possible so you can download your reports, and we will refund any prepaid fees for the period after the Service ends.</li>
+    </ol>
+
+    <h2 id="disclaimers">13. Disclaimers</h2>
+    <p class="caps">TO THE FULLEST EXTENT PERMITTED BY LAW, THE SERVICE, THE TEMPLATES AND ALL OTHER CONTENT ARE PROVIDED “AS IS” AND “AS AVAILABLE”, WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY OR QUIET ENJOYMENT, AND ANY WARRANTIES ARISING FROM COURSE OF DEALING OR USAGE OF TRADE.</p>
+    <p class="caps">WITHOUT LIMITING THE ABOVE, WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE OR SECURE; THAT DATA WILL NOT BE LOST OR CORRUPTED; THAT TEMPLATES OR REPORTS WILL BE COMPLETE, ACCURATE OR COMPLIANT WITH ANY LAW, CODE OR STANDARD; OR THAT ANY REPORT WILL BE ACCEPTED BY ANY CUSTOMER, INSPECTOR, AUTHORITY OR INSURER.</p>
+
+    <h2 id="liability">14. Limitation of liability</h2>
+    <ol>
+      <li class="caps">TO THE FULLEST EXTENT PERMITTED BY LAW, NEITHER WE NOR OUR SUPPLIERS WILL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PROFITS, REVENUE, BUSINESS, GOODWILL OR DATA, BUSINESS INTERRUPTION, COST OF SUBSTITUTE SERVICES, OR FINES, PENALTIES OR CLAIMS BY YOUR CUSTOMERS OR ANY AUTHORITY, ARISING OUT OF OR RELATED TO THE SERVICE OR THESE TERMS, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</li>
+      <li class="caps">TO THE FULLEST EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY FOR ALL CLAIMS ARISING OUT OF OR RELATED TO THE SERVICE OR THESE TERMS, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STATUTE OR OTHERWISE, IS LIMITED TO THE GREATER OF (A) THE AMOUNTS YOU PAID US FOR THE SERVICE IN THE 12 MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM AND (B) US $50.</li>
+      <li>These limits apply even if a limited remedy fails of its essential purpose. They don't limit liability that cannot be limited or excluded under applicable law, such as liability for damage caused intentionally or, where the law requires, through gross negligence.</li>
+    </ol>
+
+    <h2 id="indemnification">15. Indemnification</h2>
+    <p>You will defend, indemnify and hold harmless RaportON, its operator, contractors and suppliers from and against any third-party claims, and the resulting damages, losses, liabilities, costs and expenses (including reasonable attorneys' fees), arising out of or related to: (a) your content and the reports you create, sign or send; (b) the work and services you provide to your customers; (c) your use of the Service; (d) your violation of these Terms, any law or any third-party right; or (e) any dispute between you and your customers or any authority. We will tell you about the claim, and we may take over the defense at our own expense, in which case you will cooperate with us. You may not settle a claim in a way that imposes obligations on us without our written consent.</p>
+
+    <h2 id="disputes">16. Disputes, governing law and courts</h2>
+    <ol>
+      <li><strong>Talk to us first.</strong> Most problems can be solved quickly. Before starting any legal proceeding, email <a href="mailto:support@raporton.com">support@raporton.com</a> with a description of the issue, and we'll try in good faith to resolve it within 30 days.</li>
+      <li><strong>Governing law.</strong> These Terms and any dispute arising out of or related to them or the Service are governed by the laws of Poland, without regard to conflict-of-laws rules. The UN Convention on Contracts for the International Sale of Goods does not apply.</li>
+      <li><strong>Courts.</strong> The courts of Poland having jurisdiction over our place of residence have exclusive jurisdiction over any dispute arising out of or related to these Terms or the Service, and you and we consent to their jurisdiction. We may still ask any competent court for urgent injunctive relief to protect our intellectual property or the security of the Service.</li>
+      <li class="caps"><strong>INDIVIDUAL CLAIMS ONLY; NO JURY.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, YOU AND WE AGREE THAT ANY PROCEEDING WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS, COLLECTIVE, CONSOLIDATED OR REPRESENTATIVE ACTION, AND YOU AND WE WAIVE ANY RIGHT TO A TRIAL BY JURY.</li>
+      <li><strong>Mandatory rights.</strong> If mandatory law where you live gives you rights that can't be waived by contract (for example, a consumer's right to sue in the courts where they live), these Terms don't take those rights away.</li>
+    </ol>
+
+    <h2 id="termination">17. Suspension and termination</h2>
+    <ol>
+      <li>You can stop using the Service at any time. To delete your account and data, email <a href="mailto:support@raporton.com">support@raporton.com</a> from your account email address. If you have an active Solo subscription, cancel it first; otherwise we will cancel it when we delete your account, without a refund for the current period.</li>
+      <li>We may suspend or terminate your access if you materially or repeatedly breach these Terms, don't pay, if the law requires it, or if your use creates a security or legal risk for us or others. Where reasonable, we'll notify you first and give you a chance to fix the problem and download your reports. If we terminate your account without cause, we'll refund any prepaid fees for the remaining period.</li>
+      <li>After your account ends, we may delete your content after 30 days. Sections 6.4, 7, 8, 13, 14, 15, 16 and 19, and any other terms that by their nature should survive, survive termination.</li>
+    </ol>
+
+    <h2 id="changes">18. Changes to these Terms</h2>
+    <p>We may update these Terms, for example to reflect changes to the Service or to the law. We'll post the new version on this page with a new “Last updated” date. For material changes, we'll notify you by email or in the app at least 30 days before they take effect. If you keep using the Service after the changes take effect, you accept them; if you don't agree, stop using the Service and cancel your subscription before that date.</p>
+
+    <h2 id="general">19. General</h2>
+    <ol>
+      <li><strong>Entire agreement.</strong> These Terms and the Privacy Policy are the entire agreement between you and us about the Service and replace any earlier agreements on the subject.</li>
+      <li><strong>Severability.</strong> If any provision is found invalid or unenforceable, it will be enforced to the maximum extent permitted, and the rest of these Terms stays in effect.</li>
+      <li><strong>No waiver.</strong> If we don't enforce a provision, that's not a waiver of our right to do so later.</li>
+      <li><strong>Assignment.</strong> You may not transfer these Terms without our written consent. We may transfer them, with notice to you, to an affiliate or successor, including a company set up to operate RaportON, or in connection with a merger, acquisition or sale of assets.</li>
+      <li><strong>Force majeure.</strong> We aren't liable for delays or failures caused by events beyond our reasonable control, such as outages of hosting or internet providers, natural disasters, war or government action.</li>
+      <li><strong>Electronic communications.</strong> You agree to receive notices, receipts and other communications from us electronically, by email or in the app, and that they satisfy any legal requirement for written communications.</li>
+      <li><strong>Notices.</strong> We'll send notices to the email address on your account. You can send notices to the email or postal address in Section 20.</li>
+      <li><strong>Relationship.</strong> We are independent contractors; these Terms don't create a partnership, joint venture, employment or agency relationship. There are no third-party beneficiaries of these Terms.</li>
+      <li><strong>Language.</strong> These Terms are written in English, and the English version controls.</li>
+      <li><strong>California users.</strong> Under California Civil Code Section 1789.3, California users may contact the Complaint Assistance Unit of the Division of Consumer Services of the California Department of Consumer Affairs in writing at 1625 North Market Blvd., Suite N 112, Sacramento, CA 95834, or by telephone at (800) 952-5210.</li>
+    </ol>
+
+    <h2 id="contact">20. Contact</h2>
+    <address>
+      <p>RaportON - Andrzej Król<br>ul. Słoneczna 10a, 33-383 Tylicz, Poland<br>Email: <a href="mailto:support@raporton.com">support@raporton.com</a></p>
+    </address>
+  </div>
+</main>
+
+<footer>
+  <div>© 2026 RaportON. All rights reserved. · Created by <a href="https://akappstudio.pl" target="_blank" rel="noopener" style="color: var(--accent-ink); font-weight: 500;">akApp Studio</a></div>
+  <div class="links">
+    <a href="/terms">Terms of Service</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/contact">Contact</a>
+  </div>
+</footer>
+</body>
+</html>

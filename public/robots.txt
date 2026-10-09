@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://raporton.pl/sitemap.xml
+Sitemap: https://raporton.com/sitemap.xml

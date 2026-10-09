@@ -8,10 +8,10 @@ import {
 } from "@/lib/storage";
 
 const FIELD_TYPE_LABELS: Partial<Record<CustomFieldType, string>> = {
-  text: "Tekst krótki",
-  textarea: "Tekst długi",
-  date: "Data",
-  number: "Liczba",
+  text: "Short text",
+  textarea: "Long text",
+  date: "Date",
+  number: "Number",
 };
 
 export default function ManageTiles() {
@@ -118,7 +118,7 @@ export default function ManageTiles() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl">Ustawienia raportu</h1>
+        <h1 className="text-xl">Report settings</h1>
       </header>
 
       {/* Tab switcher */}
@@ -129,7 +129,7 @@ export default function ManageTiles() {
           onClick={() => setTab("tiles")}
           className="flex-1"
         >
-          Czynności
+          Checklist
         </Button>
         <Button
           variant={tab === "fields" ? "accent" : "outline"}
@@ -137,7 +137,7 @@ export default function ManageTiles() {
           onClick={() => setTab("fields")}
           className="flex-1"
         >
-          Pola raportu
+          Report fields
         </Button>
       </div>
 
@@ -149,7 +149,7 @@ export default function ManageTiles() {
                 className="flex-1 h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Nowa czynność..."
+                placeholder="New checklist item..."
                 onKeyDown={(e) => e.key === "Enter" && addTile()}
               />
               <Button variant="accent" size="icon" onClick={addTile} className="h-12 w-12">
@@ -157,7 +157,7 @@ export default function ManageTiles() {
               </Button>
             </div>
 
-            <p className="text-xs text-muted-foreground">Przeciągnij aby zmienić kolejność</p>
+            <p className="text-xs text-muted-foreground">Drag to reorder</p>
 
             <div
               className="space-y-2"
@@ -188,10 +188,10 @@ export default function ManageTiles() {
               {tiles.length === 0 && (
                 <div className="text-center py-6 space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    Brak czynności. Dodaj własne lub użyj gotowych szablonów branżowych.
+                    No checklist items. Add your own or use a ready-made trade template.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Przykłady: Przegląd szczelności, Wymiana filtrów, Czyszczenie jednostki, Kontrola ciśnienia, Pomiar temperatury
+                    Examples: Leak check, Replace filters, Clean the unit, Check pressures, Measure temperatures
                   </p>
                 </div>
               )}
@@ -202,7 +202,7 @@ export default function ManageTiles() {
         {tab === "fields" && (
           <>
             <p className="text-sm text-muted-foreground">
-              Zdefiniuj pola, które pojawią się w formularzu i PDF (np. Nazwa klienta, NIP, Adres, Data, Uwagi).
+              Define the fields that appear in the form and the PDF (e.g. Customer name, Address, Date, Notes).
             </p>
 
             <div className="space-y-2">
@@ -210,7 +210,7 @@ export default function ManageTiles() {
                 className="w-full h-12 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent transition-colors"
                 value={newFieldLabel}
                 onChange={(e) => setNewFieldLabel(e.target.value)}
-                placeholder="Nazwa pola (np. Nr seryjny)"
+                placeholder="Field name (e.g. Serial number)"
                 onKeyDown={(e) => e.key === "Enter" && addField()}
               />
               <div className="flex gap-2">
@@ -229,7 +229,7 @@ export default function ManageTiles() {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground">Przeciągnij aby zmienić kolejność</p>
+            <p className="text-xs text-muted-foreground">Drag to reorder</p>
 
             <div
               className="space-y-2"
@@ -259,7 +259,7 @@ export default function ManageTiles() {
                     <button
                       onClick={() => toggleRemember(field.id)}
                       className={`transition-colors ${field.remember ? "text-accent" : "text-muted-foreground hover:text-accent"}`}
-                      title="Zapamiętaj na stałe"
+                      title="Remember this value"
                     >
                       <Bookmark className="h-5 w-5" fill={field.remember ? "currentColor" : "none"} />
                     </button>
@@ -272,10 +272,10 @@ export default function ManageTiles() {
               {customFields.length === 0 && (
                 <div className="text-center py-6 space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    Brak pól. Te pola dotyczą tylko szablonu „Raport serwisowy" (własny).
+                    No fields. These fields apply only to the custom "Service report" template.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Przykłady: Nazwa klienta, Adres obiektu, NIP, Data, Nr seryjny, Uwagi
+                    Examples: Customer name, Service address, Date, Serial number, Notes
                   </p>
                 </div>
               )}
