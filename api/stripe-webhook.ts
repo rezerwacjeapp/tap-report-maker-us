@@ -5,7 +5,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 const supabase = createClient(
-  "https://iqlpnankcwiluvmollfr.supabase.co",
+  "https://ephjatoxmdeklvmefgaw.supabase.co",
   process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 );
 
