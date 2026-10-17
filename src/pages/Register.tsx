@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { BrandLockup } from "@/components/BrandLogo";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 function GoogleIcon() {
   return (
@@ -106,20 +107,26 @@ export default function Register() {
         </div>
 
         <div className="space-y-4">
-          {/* Google button */}
-          <button
-            type="button"
-            onClick={handleGoogle}
-            disabled={googleLoading}
-            className="w-full h-12 rounded-xl border border-border bg-card font-medium flex items-center justify-center gap-3 active:scale-[0.98] transition-transform disabled:opacity-50 hover:bg-muted/50"
-          >
-            {googleLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
-              <>
-                <GoogleIcon />
-                Sign up with Google
-              </>
-            )}
-          </button>
+          {/* Google button (Google Identity Services popup; old redirect button as fallback) */}
+          <GoogleSignInButton
+            text="signup_with"
+            onError={setError}
+            fallback={
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={googleLoading}
+                className="w-full h-12 rounded-xl border border-border bg-card font-medium flex items-center justify-center gap-3 active:scale-[0.98] transition-transform disabled:opacity-50 hover:bg-muted/50"
+              >
+                {googleLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                  <>
+                    <GoogleIcon />
+                    Sign up with Google
+                  </>
+                )}
+              </button>
+            }
+          />
 
           {/* Separator */}
           <div className="flex items-center gap-3">
