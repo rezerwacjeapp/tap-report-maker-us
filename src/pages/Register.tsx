@@ -64,8 +64,11 @@ export default function Register() {
     if (error) {
       setError(error);
     } else {
-      // Save consent flags — will be applied when user confirms email and first logs in
-      localStorage.setItem("raporton_pending_consent", JSON.stringify({ terms: true, marketing }));
+      // Save consent flags — applied when this user confirms the email and first signs in
+      localStorage.setItem(
+        "raporton_pending_consent",
+        JSON.stringify({ terms: true, marketing, email: email.trim(), acceptedAt: new Date().toISOString() })
+      );
       setSuccess(true);
     }
   };
@@ -182,8 +185,8 @@ export default function Register() {
                   onChange={(e) => { setTerms(e.target.checked); setError(""); }}
                   className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
                 />
-                <span className="text-xs leading-snug text-muted-foreground">
-                  I am at least 18 years old and I agree to the{" "}
+                <span className="text-xs leading-snug text-foreground">
+                  I am at least 18 years old, I will use RaportON for my business, and I agree to the{" "}
                   <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
                   {" "}and{" "}
                   <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>

@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Zap, Infinity as InfinityIcon, Loader2, Droplet, Sett
 import { Button } from "@/components/ui/button";
 import { checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 // Stripe Payment Link of the US account (USD price). Set in Vercel as VITE_STRIPE_PAYMENT_LINK;
 // without it the upgrade button is disabled, so nobody can pay through a wrong account.
@@ -22,6 +23,9 @@ export default function Upgrade() {
     trial?: boolean; trialDaysLeft?: number;
   } | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
+  // Express consent to the automatic renewal terms, required before going to Stripe
+  const [renewalOk, setRenewalOk] = useState(false);
+  const [renewalError, setRenewalError] = useState(false);
 
   useEffect(() => {
     checkReportLimit()
@@ -59,6 +63,10 @@ export default function Upgrade() {
 
   const handleUpgrade = () => {
     if (!user || !STRIPE_PAYMENT_LINK) return;
+    if (!renewalOk) {
+      setRenewalError(true);
+      return;
+    }
     const url = `${STRIPE_PAYMENT_LINK}?client_reference_id=${user.id}&prefilled_email=${encodeURIComponent(user.email || "")}`;
     window.location.href = url;
   };
@@ -95,7 +103,7 @@ export default function Upgrade() {
           <h2 className="text-2xl font-bold">Solo plan is active!</h2>
           <p className="text-muted-foreground mt-2">Unlimited reports, no watermark.</p>
           <Button className="mt-6" onClick={() => navigate("/")}>Back to the app</Button>
-          {STRIPE_PORTAL_URL && (
+          {STRIPE_PORTAL_URL ? (
             <div className="mt-8 max-w-xs">
               <a
                 href={`${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`}
@@ -109,6 +117,13 @@ export default function Upgrade() {
                 Receipts, payment card and cancellation. If you cancel, Solo stays active until the end of the period you paid for.
               </p>
             </div>
+          ) : (
+            // Without the portal link there must still be a way to cancel
+            <p className="mt-8 max-w-xs text-xs text-muted-foreground">
+              To cancel or manage your subscription, email{" "}
+              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Manage my RaportON subscription")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
+              {" "}from your account email address. If you cancel, Solo stays active until the end of the period you paid for.
+            </p>
           )}
         </main>
       </div>
@@ -218,23 +233,41 @@ export default function Upgrade() {
               </div>
             </div>
 
+            {STRIPE_PAYMENT_LINK && (
+              <>
+                <label
+                  className={`mt-6 flex items-start gap-2.5 cursor-pointer rounded-xl border bg-secondary/40 p-3 ${
+                    renewalError ? "border-destructive" : "border-border"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={renewalOk}
+                    onChange={(e) => { setRenewalOk(e.target.checked); setRenewalError(false); }}
+                    className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
+                  />
+                  <span className="text-xs leading-snug text-foreground">
+                    <strong>Solo renews automatically every month at {PRICE}</strong> (plus any applicable sales tax),
+                    charged to your card until you cancel. Cancel anytime online: Profile → Plan details → Manage
+                    subscription. Solo stays active until the end of the month you paid for. No refunds for partial
+                    months. I agree to these terms and the{" "}
+                    <a href="/terms#subscriptions" target="_blank" className="text-accent underline">Terms of Service</a>.
+                  </span>
+                </label>
+                {renewalError && (
+                  <p className="text-xs text-destructive mt-2">Tick the box to confirm the renewal terms.</p>
+                )}
+              </>
+            )}
             <button
               onClick={handleUpgrade}
               disabled={!STRIPE_PAYMENT_LINK}
-              className="w-full mt-6 h-12 rounded-xl bg-accent text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50 disabled:active:scale-100"
+              className={`w-full ${STRIPE_PAYMENT_LINK ? "mt-4" : "mt-6"} h-12 rounded-xl bg-accent text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50 disabled:active:scale-100`}
             >
               <Zap className="h-5 w-5" />
               Upgrade to Solo - {PRICE}/month
             </button>
-            {STRIPE_PAYMENT_LINK ? (
-              <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-                Your subscription renews automatically every month at {PRICE} (plus any applicable sales tax)
-                until you cancel. You can cancel anytime under Profile → Plan details → Manage subscription;
-                Solo stays active until the end of the month you paid for. No refunds for partial months.
-                By upgrading you agree to the{" "}
-                <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>.
-              </p>
-            ) : (
+            {!STRIPE_PAYMENT_LINK && (
               <p className="text-[11px] text-muted-foreground mt-3 text-center">Online payments are being set up - check back soon.</p>
             )}
           </div>
