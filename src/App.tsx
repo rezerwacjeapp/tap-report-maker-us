@@ -15,7 +15,7 @@ import Landing from "./pages/Landing";
 import SetNewPassword from "./pages/SetNewPassword";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import { ConsentModal } from "./components/ConsentModal";
-import { hasAcceptedTerms, saveConsent } from "./lib/supabase-storage";
+import { getTermsStatus, saveConsent } from "./lib/supabase-storage";
 import { wantsSolo, rememberSoloIntent, takeSoloIntent } from "./lib/plan-intent";
 
 /**
@@ -74,26 +74,41 @@ function AppShell() {
   // Consent state — hooks must be before any conditional returns
   const [consentChecked, setConsentChecked] = useState(false);
   const [needsConsent, setNeedsConsent] = useState(false);
+  // true = the user accepted an older version of the Terms and must accept the current one
+  const [termsUpdated, setTermsUpdated] = useState(false);
+  // The user object changes on every auth event; check consent once per account
+  const userId = user?.id;
+  const userEmail = user?.email || "";
 
   useEffect(() => {
-    if (!user) { setConsentChecked(false); setNeedsConsent(false); return; }
-    // Check if there's pending consent from email registration
+    if (!userId) { setConsentChecked(false); setNeedsConsent(false); setTermsUpdated(false); return; }
+    let cancelled = false;
+    const checkStatus = () =>
+      getTermsStatus()
+        .then((status) => {
+          if (cancelled) return;
+          setTermsUpdated(status === "outdated");
+          setNeedsConsent(status !== "accepted");
+          setConsentChecked(true);
+        })
+        .catch(() => { if (!cancelled) setConsentChecked(true); });
+
+    // Consent given at email sign-up - applied on first sign-in, only to the account that gave it
     const pending = localStorage.getItem("raporton_pending_consent");
     if (pending) {
+      localStorage.removeItem("raporton_pending_consent");
       try {
-        const { marketing } = JSON.parse(pending);
-        saveConsent(marketing).then(() => {
-          localStorage.removeItem("raporton_pending_consent");
-          setNeedsConsent(false);
-          setConsentChecked(true);
-        });
-        return;
-      } catch { localStorage.removeItem("raporton_pending_consent"); }
+        const { marketing, email, acceptedAt } = JSON.parse(pending);
+        if (!email || String(email).toLowerCase() === userEmail.toLowerCase()) {
+          saveConsent(!!marketing, typeof acceptedAt === "string" ? acceptedAt : undefined)
+            .then(checkStatus, checkStatus);
+          return () => { cancelled = true; };
+        }
+      } catch { /* ignore a malformed entry */ }
     }
-    hasAcceptedTerms()
-      .then((accepted) => { setNeedsConsent(!accepted); setConsentChecked(true); })
-      .catch(() => setConsentChecked(true));
-  }, [user]);
+    checkStatus();
+    return () => { cancelled = true; };
+  }, [userId, userEmail]);
 
   // "Choose Solo" from the landing page (/register?plan=solo): remember it until the user logs in
   useEffect(() => {
@@ -141,7 +156,7 @@ function AppShell() {
   if (!consentChecked) return <LoadingScreen />;
 
   if (needsConsent) {
-    return <ConsentModal onAccepted={() => setNeedsConsent(false)} />;
+    return <ConsentModal updated={termsUpdated} onAccepted={() => setNeedsConsent(false)} />;
   }
 
   return (
