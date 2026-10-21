@@ -5,9 +5,11 @@ import { BrandLockup } from "@/components/BrandLogo";
 
 interface Props {
   onAccepted: () => void;
+  /** The user accepted an older version - ask only for the updated Terms, keep their marketing choice. */
+  updated?: boolean;
 }
 
-export function ConsentModal({ onAccepted }: Props) {
+export function ConsentModal({ onAccepted, updated = false }: Props) {
   const [terms, setTerms] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ export function ConsentModal({ onAccepted }: Props) {
     setError("");
     setLoading(true);
     try {
-      await saveConsent(marketing);
+      await saveConsent(updated ? undefined : marketing);
       onAccepted();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -37,7 +39,11 @@ export function ConsentModal({ onAccepted }: Props) {
           <h2 className="flex justify-center">
             <BrandLockup markClassName="h-7 w-auto" textClassName="text-xl" />
           </h2>
-          <p className="text-sm text-muted-foreground">One more step - please confirm below</p>
+          <p className="text-sm text-muted-foreground">
+            {updated
+              ? "We've updated our Terms of Service and Privacy Policy. Please review and accept them to keep using RaportON."
+              : "One more step - please confirm below"}
+          </p>
         </div>
 
         <div className="space-y-3">
@@ -50,7 +56,7 @@ export function ConsentModal({ onAccepted }: Props) {
               className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
             />
             <span className="text-sm leading-snug">
-              I am at least 18 years old and I agree to the{" "}
+              I am at least 18 years old, I will use RaportON for my business, and I agree to the{" "}
               <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
               {" "}and{" "}
               <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>
@@ -58,18 +64,20 @@ export function ConsentModal({ onAccepted }: Props) {
             </span>
           </label>
 
-          {/* Optional: marketing */}
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={marketing}
-              onChange={(e) => setMarketing(e.target.checked)}
-              className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
-            />
-            <span className="text-sm leading-snug text-muted-foreground">
-              Send me occasional emails about RaportON updates and offers
-            </span>
-          </label>
+          {/* Optional: marketing (first acceptance only) */}
+          {!updated && (
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={marketing}
+                onChange={(e) => setMarketing(e.target.checked)}
+                className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
+              />
+              <span className="text-sm leading-snug text-muted-foreground">
+                Send me occasional emails about RaportON updates and offers
+              </span>
+            </label>
+          )}
         </div>
 
         {error && (
