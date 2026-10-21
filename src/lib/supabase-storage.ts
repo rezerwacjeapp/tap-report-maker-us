@@ -4,6 +4,7 @@
  */
 
 import { supabase } from "./supabase";
+import { TERMS_VERSION } from "./site";
 import { DEFAULT_PROFILE_FIELDS, type CompanyProfile, type ReportHistoryItem } from "./storage";
 import type { GeneratedReport } from "./pdf-generator";
 
@@ -46,31 +47,47 @@ export async function saveCloudProfile(profile: CompanyProfile): Promise<void> {
 
 // ─── CONSENT ────────────────────────────────────────────────
 
-export async function hasAcceptedTerms(): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
+/** "outdated" = accepted, but before the current TERMS_VERSION took effect. */
+export type TermsStatus = "accepted" | "outdated" | "missing";
 
-  const { data } = await supabase
+export async function getTermsStatus(): Promise<TermsStatus> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return "missing";
+
+  const { data, error } = await supabase
     .from("profiles")
     .select("terms_accepted_at")
     .eq("id", user.id)
     .single();
+  if (error) throw error;
 
-  return !!data?.terms_accepted_at;
+  const acceptedAt = data?.terms_accepted_at ? new Date(data.terms_accepted_at).getTime() : NaN;
+  if (!Number.isFinite(acceptedAt)) return "missing";
+  return acceptedAt >= Date.parse(`${TERMS_VERSION}T00:00:00Z`) ? "accepted" : "outdated";
 }
 
-export async function saveConsent(marketing: boolean): Promise<void> {
+/**
+ * Records acceptance of the Terms and Privacy Policy (now, or at `acceptedAt` -
+ * the moment the box was ticked at sign-up). Marketing consent is changed only
+ * when `marketing` is given. Throws if nothing was saved.
+ */
+export async function saveConsent(marketing?: boolean, acceptedAt?: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) throw new Error("Not signed in");
 
   const now = new Date().toISOString();
-  await supabase
+  const update: { terms_accepted_at: string; marketing_consent_at?: string | null } = {
+    terms_accepted_at: acceptedAt || now,
+  };
+  if (marketing !== undefined) update.marketing_consent_at = marketing ? acceptedAt || now : null;
+
+  const { data, error } = await supabase
     .from("profiles")
-    .update({
-      terms_accepted_at: now,
-      marketing_consent_at: marketing ? now : null,
-    })
-    .eq("id", user.id);
+    .update(update)
+    .eq("id", user.id)
+    .select("id");
+  if (error) throw error;
+  if (!data?.length) throw new Error("Profile not found");
 }
 
 // ─── REPORTS ────────────────────────────────────────────────
