@@ -5,7 +5,7 @@ import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
 import { TemplatePreview } from "@/components/TemplatePreview";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare, History } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare, History, Languages } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft, getRememberedValues, rememberTemplateValues,
   type ReportDraft, type TextStyle, type CustomFieldDef,
@@ -126,20 +126,18 @@ export default function ReportWizard() {
   // Draft
   // New report: report date = today, other dates empty (a pre-filled "today" in
   // e.g. "Calibration due date" would be wrong), "remember" fields prefilled.
+  // Checklist items start "not checked" (printed as "-"): N/A is only what the technician marked as N/A.
   const buildEmptyDraft = useCallback((): ReportDraft => {
     const cf: Record<string, string> = {};
-    const ts: Record<string, "done" | "fail" | "na"> = {};
     const remembered = getRememberedValues();
     const mainDate = mainDateFieldId(allFields);
     allFields.forEach((f) => {
       const mem = f.remember && remembered[f.id] ? remembered[f.id] : undefined;
       if (f.type === "date") cf[f.id] = mem ?? (f.id === mainDate ? todayISO() : "");
-      else if (f.type === "tiles") {
-        (f.tileOptions || []).forEach((t) => { ts[t.id] = "na"; });
-      } else if (f.type === "table") cf[f.id] = initialTableValue(f);
-      else if (!["photos", "signature", "heading", "info"].includes(f.type)) cf[f.id] = mem ?? "";
+      else if (f.type === "table") cf[f.id] = initialTableValue(f);
+      else if (!["photos", "signature", "heading", "info", "tiles"].includes(f.type)) cf[f.id] = mem ?? "";
     });
-    return { selectedTiles: [], tileStates: ts, tileNotes: {}, photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
+    return { selectedTiles: [], tileStates: {}, tileNotes: {}, photos: [], photosByField: {}, signatures: {}, customFields: cf, reportNumber: "", templateId };
   }, [allFields, templateId]);
 
   // "New from this one" — fields copied from a previous report, flagged until edited
@@ -171,7 +169,7 @@ export default function ReportWizard() {
         if (payload?.draft) {
           const { draft: d, copiedIds: ids } = buildReuseDraft(allFields, buildEmptyDraft(), payload.draft);
           clearDraft();
-          setDraft(d);
+          setDraft(payload.draft.pdfLanguage === "es" ? { ...d, pdfLanguage: "es" } : d);
           setCopiedIds(new Set(ids));
           setReuseInfo(payload.label || "the previous report");
           setInitialized(true);
@@ -205,7 +203,7 @@ export default function ReportWizard() {
       const fieldById = new Map(allFields.map((f) => [f.id, f] as [string, CustomFieldDef]));
       const hasContent = saved.selectedTiles.length > 0 || saved.photos.length > 0 ||
         Object.values(saved.photosByField || {}).some((arr) => arr.length > 0) ||
-        Object.values(saved.tileStates || {}).some((v) => v !== "na") ||
+        Object.keys(saved.tileStates || {}).length > 0 ||
         Object.values(saved.tileNotes || {}).some((v) => v?.trim()) ||
         Object.entries(saved.customFields).some(([id, v]) => {
           if (isTableValue(v)) return tableHasContent(v, fieldById.get(id));
@@ -222,7 +220,7 @@ export default function ReportWizard() {
   // the client signs again, so nobody can edit what was already signed.
   const handleResume = () => {
     const saved = getDraft();
-    const d: ReportDraft = { ...saved, signatures: {} };
+    const d: ReportDraft = { ...saved, signatures: {}, signedAt: {} };
     saveDraft(d);
     setDraft(d);
     if (resumeHasSignatures) toast("Signatures from the interrupted report were removed - please collect them again.");
@@ -255,8 +253,11 @@ export default function ReportWizard() {
     setDraft((d) => { const next = { ...d, ...partial }; if (!finishedRef.current) saveDraft(next); return next; });
   }, []);
 
+  // Tapping the selected status again clears it back to "not checked"
   const setTileState = (tileId: string, state: "done" | "fail" | "na") => {
-    const newStates = { ...(draft.tileStates || {}), [tileId]: state };
+    const newStates = { ...(draft.tileStates || {}) };
+    if (newStates[tileId] === state) delete newStates[tileId];
+    else newStates[tileId] = state;
     // Keep selectedTiles in sync for backward compat
     const newSelected = Object.entries(newStates).filter(([, s]) => s === "done").map(([id]) => id);
     update({ tileStates: newStates, selectedTiles: newSelected });
@@ -283,7 +284,25 @@ export default function ReportWizard() {
   const copiedTag = (id: string) => copiedIds.has(id)
     ? <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 align-middle"><History className="h-3 w-3" />from last report</span>
     : null;
-  const updateSignature = (sigId: string, data: string | null) => update({ signatures: { ...draft.signatures, [sigId]: data } });
+  // The time of the last stroke is stored with the signature and printed under it
+  const updateSignature = (sigId: string, data: string | null) => {
+    const signedAt = { ...(draft.signedAt || {}) };
+    if (data) signedAt[sigId] = new Date().toISOString();
+    else delete signedAt[sigId];
+    update({ signatures: { ...draft.signatures, [sigId]: data }, signedAt });
+  };
+  const updateSignerName = (sigId: string, name: string) => update({ signerNames: { ...(draft.signerNames || {}), [sigId]: name } });
+
+  // PDF language: built-in template texts and fixed labels in Spanish. The Spanish
+  // dictionary loads only when it's switched on, for the live preview.
+  const pdfLanguage = draft.pdfLanguage === "es" ? "es" : "en";
+  const [previewTr, setPreviewTr] = useState<((s: string) => string) | null>(null);
+  useEffect(() => {
+    if (pdfLanguage !== "es") { setPreviewTr(null); return; }
+    let live = true;
+    import("@/lib/pdf-i18n").then((m) => { if (live) setPreviewTr(() => m.translator("es")); }).catch(() => {});
+    return () => { live = false; };
+  }, [pdfLanguage]);
 
   // A typed-in number that already exists in history → ask before generating
   const [numberConflict, setNumberConflict] = useState<{ current: string; next: string; takenDate: string; takenClient: string } | null>(null);
@@ -513,6 +532,15 @@ export default function ReportWizard() {
           {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{showCompanyHeader ? "Company info shown" : "Company info hidden"}</span>
         </button>
+        <button
+          onClick={() => update({ pdfLanguage: pdfLanguage === "es" ? "en" : "es" })}
+          className={`flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${pdfLanguage === "es" ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"}`}
+          title={pdfLanguage === "es" ? "PDF in Spanish - tap for English" : "PDF in English - tap for Spanish"}
+          aria-label="PDF language"
+        >
+          <Languages className="h-3.5 w-3.5" />
+          <span>PDF: {pdfLanguage === "es" ? "ES" : "EN"}</span>
+        </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
 
@@ -587,12 +615,13 @@ export default function ReportWizard() {
             /* INFO — static text block */
             ) : field.type === "info" ? (
               <div>
-                {field.label && <h4 className="text-sm font-semibold text-foreground mb-1" style={textStyleToCss(field.labelStyle)}>{field.label}</h4>}
+                {field.label && <h4 className="text-sm font-semibold text-foreground mb-1 pr-6" style={textStyleToCss(field.labelStyle)}>{field.label}</h4>}
                 {field.content && (
                   <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed" style={textStyleToCss(field.contentStyle)}>
                     {field.content}
                   </div>
                 )}
+                {field.pdf === false && <p className="text-[11px] text-muted-foreground mt-1">Only for you - not printed on the PDF.</p>}
               </div>
 
             /* TILES */
@@ -602,7 +631,7 @@ export default function ReportWizard() {
                 {(field.tileOptions || []).length > 0 ? (
                   <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
                     {(field.tileOptions || []).map((tile) => {
-                      const state = (draft.tileStates || {})[tile.id] || "na";
+                      const state = (draft.tileStates || {})[tile.id];
                       const noteExpanded = expandedNoteIds.has(tile.id);
                       const noteText = (draft.tileNotes || {})[tile.id] || "";
                       return (
@@ -664,6 +693,14 @@ export default function ReportWizard() {
                   value={draft.signatures[field.id] || null}
                   onChange={(data) => updateSignature(field.id, data)}
                   label={field.label}
+                />
+                <input
+                  type="text"
+                  className="mt-2 w-full h-11 rounded-xl border border-border bg-card px-4 text-base focus:outline-none focus:border-accent"
+                  value={(draft.signerNames || {})[field.id] || ""}
+                  onChange={(e) => updateSignerName(field.id, e.target.value)}
+                  placeholder="Printed name of the person signing"
+                  autoComplete="off"
                 />
               </div>
 
@@ -805,6 +842,9 @@ export default function ReportWizard() {
               tileStates={draft.tileStates || {}}
               tileNotes={draft.tileNotes || {}}
               signatures={draft.signatures}
+              signerNames={draft.signerNames}
+              signedAt={draft.signedAt}
+              tr={pdfLanguage === "es" ? previewTr || undefined : undefined}
               photosByField={draft.photosByField}
               additionalNotes={draft.additionalNotes}
               onFieldClick={jumpToField}

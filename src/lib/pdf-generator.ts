@@ -3,7 +3,8 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { CompanyProfile, ReportDraft, TextStyle, CustomFieldDef } from "./storage";
 import { getTiles, getCustomFields } from "./storage";
 import { parseTable, tableColumns, filledRows, serializeTable, colsSnapshot } from "./table-field";
-import { todayISO, isISODate, formatDateUS } from "./report-utils";
+import { todayISO, isISODate, formatDateUS, formatDateTimeUS } from "./report-utils";
+import { translator } from "./pdf-i18n";
 
 // Register Roboto font (pdfmake default, covers Latin-extended characters)
 try {
@@ -142,6 +143,9 @@ export function buildReportDocument(
   const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Customer signature" }];
   const showCompanyHeader = options?.showCompanyHeader !== false;
   const watermark = options?.watermark === true;
+  // Spanish PDF: built-in template texts, picked options and fixed labels are translated;
+  // what the technician typed stays as typed.
+  const t = translator(draft.pdfLanguage === "es" ? "es" : "en");
 
   // Derive selected tiles from tileStates (done) or legacy selectedTiles
   const tileStates = draft.tileStates || {};
@@ -197,9 +201,9 @@ export function buildReportDocument(
 
     headerCols.push({
       stack: [
-        { text: firstField?.value || "Company", style: "companyName" },
+        { text: firstField?.value || t("Company"), style: "companyName" },
         ...restFields.map((f) => ({
-          text: f.label ? `${f.label}: ${f.value}` : f.value,
+          text: f.label ? `${t(f.label)}: ${f.value}` : f.value,
           style: "companyDetail",
         })),
       ],
@@ -222,7 +226,7 @@ export function buildReportDocument(
   // Title row
   content.push({
     columns: [
-      { text: pdfTitle, style: "title", width: "*" },
+      { text: t(pdfTitle), style: "title", width: "*" },
       ...(reportNum ? [{ text: reportNum, style: "reportNumber", width: "auto", alignment: "right" as const }] : []),
     ],
     margin: [0, 0, 0, 16] as [number, number, number, number],
@@ -250,11 +254,14 @@ export function buildReportDocument(
     pendingDataRows = [];
   };
 
-  customFields.forEach((field) => {
+  // Text right before a signature (what the person confirms by signing) is kept on the same page as the signature
+  let heldInfo: any = null;
+
+  customFields.forEach((field, idx) => {
     // --- HEADING (static section header) ---
     if (field.type === "heading") {
       flushDataRows();
-      content.push(buildStyledLabel(field.label, "sectionHeader", field.labelStyle, {
+      content.push(buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle, {
         margin: [0, 10, 0, 6] as [number, number, number, number],
       }));
       return;
@@ -262,12 +269,13 @@ export function buildReportDocument(
 
     // --- INFO (static text block) ---
     if (field.type === "info") {
+      if (field.pdf === false) return; // a note for the technician, not for the customer
       flushDataRows();
       const infoStack: any[] = [];
       if (field.label) {
         const ls = field.labelStyle;
         infoStack.push({
-          text: field.label,
+          text: t(field.label),
           bold: ls?.bold ?? true,
           italics: ls?.italic || false,
           alignment: ls?.align || undefined,
@@ -279,7 +287,7 @@ export function buildReportDocument(
       if (field.content) {
         const cs = field.contentStyle;
         infoStack.push({
-          text: pdfSafe(field.content),
+          text: pdfSafe(t(field.content)),
           bold: cs?.bold || false,
           italics: cs?.italic || false,
           alignment: cs?.align || undefined,
@@ -290,7 +298,8 @@ export function buildReportDocument(
         });
       }
       if (infoStack.length > 0) {
-        content.push({ stack: infoStack });
+        if (customFields[idx + 1]?.type === "signature") heldInfo = { stack: infoStack };
+        else content.push({ stack: infoStack });
       }
       return;
     }
@@ -304,14 +313,14 @@ export function buildReportDocument(
 
       if (field.type === "textarea") {
         pendingDataRows.push([
-          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
+          buildStyledLabel(t(field.label), "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
         ]);
         pendingDataRows.push([
           { text: pdfSafe(value), style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
         ]);
       } else {
         pendingDataRows.push([
-          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
+          buildStyledLabel(t(field.label), "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
           { text: pdfSafe(value), style: "fieldValue", border: [false, false, false, true] },
         ]);
       }
@@ -331,7 +340,7 @@ export function buildReportDocument(
       const span = cols.length + 1;
       const titleRow: any[] = [
         {
-          ...buildStyledLabel(field.label, "sectionHeader", field.labelStyle),
+          ...buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle),
           colSpan: span,
           border: [false, false, false, false],
           margin: [-4, 4, 0, 6] as [number, number, number, number],
@@ -342,17 +351,21 @@ export function buildReportDocument(
       const headerRow: any[] = [
         { text: "#", style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary, alignment: "center" as const },
         ...cols.map((c) => ({
-          text: c.label, style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
+          text: t(c.label), style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
           alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
         })),
       ];
       const body: any[][] = [titleRow, headerRow];
+      const startRows = new Set((field.tableRows || []).map((r) => r.trim()));
+      // fixed texts in a table: picked options and the template's starting row names
+      const cellText = (c: import("./storage").TableColumnDef, ci: number, raw: string) =>
+        c.kind === "choice" || (ci === 0 && startRows.has(raw.trim())) ? t(raw) : raw;
       rows.forEach((row, i) => {
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
         body.push([
           { text: `${i + 1}`, style: "tableCell", fontSize: cellSize, fillColor: bg, alignment: "center" as const },
-          ...cols.map((c) => ({
-            text: pdfSafe((row[c.id] ?? "").toString()), style: "tableCell", fontSize: cellSize, fillColor: bg,
+          ...cols.map((c, ci) => ({
+            text: pdfSafe(cellText(c, ci, (row[c.id] ?? "").toString())), style: "tableCell", fontSize: cellSize, fillColor: bg,
             alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
             bold: c.kind === "choice",
           })),
@@ -388,8 +401,8 @@ export function buildReportDocument(
       const body: any[][] = [
         [
           { text: "#", style: "tableHeader", fillColor: COLORS.primary },
-          { text: "Item", style: "tableHeader", fillColor: COLORS.primary },
-          { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
+          { text: t("Item"), style: "tableHeader", fillColor: COLORS.primary },
+          { text: t("Status"), style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
         ],
       ];
 
@@ -397,8 +410,9 @@ export function buildReportDocument(
       const tileNotes = draft.tileNotes || {};
 
       (field.tileOptions || []).forEach((tile, i) => {
-        // Determine state: new tileStates > legacy selectedTiles > default "na"
-        let state: "done" | "fail" | "na" = "na";
+        // State: tileStates > legacy selectedTiles > not checked. Not checked prints "-":
+        // N/A ("not applicable") only where the technician chose it.
+        let state: "done" | "fail" | "na" | undefined;
         if (tileStates[tile.id]) {
           state = tileStates[tile.id];
         } else if (draft.selectedTiles.includes(tile.id)) {
@@ -406,11 +420,11 @@ export function buildReportDocument(
         }
 
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-        const statusText = state === "done" ? "YES" : state === "fail" ? "NO" : "N/A";
+        const statusText = state === "done" ? t("YES") : state === "fail" ? t("NO") : state === "na" ? t("N/A") : "-";
 
         body.push([
           { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
-          { text: tile.label, style: "tableCell", fillColor: bg },
+          { text: pdfSafe(t(tile.label)), style: "tableCell", fillColor: bg },
           {
             text: statusText,
             style: "tableCell", fillColor: bg, alignment: "center" as const,
@@ -433,7 +447,7 @@ export function buildReportDocument(
       // Wrap header + table in unbreakable stack so they don't split across pages
       content.push({
         stack: [
-          buildStyledLabel(field.label, "sectionHeader", field.labelStyle, { margin: [0, 4, 0, 8] as [number, number, number, number] }),
+          buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle, { margin: [0, 4, 0, 8] as [number, number, number, number] }),
           {
             table: { headerRows: 1, widths: [30, "*", 45], body },
             layout: {
@@ -470,7 +484,7 @@ export function buildReportDocument(
 
         // First pair gets the section header attached
         if (i === 0) {
-          photoRow.unshift({ text: field.label || "Photos", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+          photoRow.unshift({ text: t(field.label || "Photos"), style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
         }
 
         content.push({
@@ -490,8 +504,10 @@ export function buildReportDocument(
       const sigAlign = field.labelStyle?.align || "left";
 
       const sigStack: any[] = [
-        { text: field.label, style: "sectionHeader", alignment: sigAlign, margin: [0, 8, 0, 6] as [number, number, number, number] },
+        ...(heldInfo ? [heldInfo] : []),
+        { text: t(field.label), style: "sectionHeader", alignment: sigAlign, margin: [0, 8, 0, 6] as [number, number, number, number] },
       ];
+      heldInfo = null;
 
       if (sigData) {
         // Signed digitally — show image
@@ -507,10 +523,19 @@ export function buildReportDocument(
       const lineMarginLeft = sigAlign === "center" ? (pageContentWidth - lineWidth) / 2
         : sigAlign === "right" ? pageContentWidth - lineWidth : 0;
 
+      // Under the line: printed name and the time the signature was captured
+      const signer = (draft.signerNames || {})[field.id]?.trim();
+      const signedAt = sigData ? (draft.signedAt || {})[field.id] : undefined;
+      const signerLine = [signer ? `${t("Name")}: ${signer}` : "", signedAt ? `${t("Signed")}: ${formatDateTimeUS(signedAt)}` : ""]
+        .filter(Boolean).join("   ");
+
       sigStack.push({
         canvas: [{ type: "line", x1: 0, y1: 0, x2: lineWidth, y2: 0, lineWidth: 0.5, lineColor: COLORS.primary }],
-        margin: [lineMarginLeft, 2, 0, 8] as [number, number, number, number],
+        margin: [lineMarginLeft, 2, 0, signerLine ? 3 : 8] as [number, number, number, number],
       });
+      if (signerLine) {
+        sigStack.push({ text: pdfSafe(signerLine), fontSize: 8, color: COLORS.gray, alignment: sigAlign, margin: [0, 0, 0, 8] as [number, number, number, number] });
+      }
 
       content.push({ stack: sigStack, unbreakable: true });
     }
@@ -523,7 +548,7 @@ export function buildReportDocument(
   if (draft.additionalNotes?.trim()) {
     content.push({
       stack: [
-        { text: "Additional notes", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
+        { text: t("Additional notes"), style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
         { text: draft.additionalNotes.trim(), style: "fieldValue" },
       ],
       unbreakable: true,
@@ -561,8 +586,8 @@ export function buildReportDocument(
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `Generated: ${generationDate} • ${profileFields[0]?.value || "Servisheet"}`, style: "footer", alignment: "left" as const },
-        { text: `Page ${currentPage} of ${pageCount}`, style: "footer", alignment: "right" as const },
+        { text: `${t("Generated")}: ${generationDate} • ${profileFields[0]?.value || "Servisheet"}`, style: "footer", alignment: "left" as const },
+        { text: `${t("Page")} ${currentPage} ${t("of")} ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
     }),

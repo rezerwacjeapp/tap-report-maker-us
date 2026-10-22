@@ -29,6 +29,9 @@ export interface TableColumnDef {
   label: string;
   kind?: "text" | "number" | "choice";
   options?: string[];
+  /** "New from this one": true = copy (identifying data such as type or size), false = never copy.
+   *  Not set: text columns are copied, number and choice columns start empty. */
+  reuse?: boolean;
 }
 
 export interface TextStyle {
@@ -58,15 +61,29 @@ export interface CustomFieldDef {
   contentStyle?: TextStyle; // for "info" type — style of content text
   tableColumns?: TableColumnDef[]; // for "table" type
   tableRows?: string[]; // for "table" type — starting rows, value of the first column (e.g. meter names)
+  /** "New from this one": true = copy into the next report (nameplate data, sizes…), false = always start
+   *  empty (readings, findings, times). Not set: text is copied, numbers start empty. */
+  reuse?: boolean;
+  /** "New from this one": start this field with the previous report's value of another field
+   *  (e.g. "Previous main drain static pressure" ← last "Main drain static pressure"). */
+  reuseFrom?: string;
+  /** "info" type: false = shown while filling in the report, not printed on the PDF. */
+  pdf?: boolean;
 }
 
 export interface ReportDraft {
   selectedTiles: string[]; // kept for backward compat — derived from tileStates "done"
-  tileStates?: Record<string, "done" | "fail" | "na">; // per-tile status
+  tileStates?: Record<string, "done" | "fail" | "na">; // per-tile status; no entry = not checked
   tileNotes?: Record<string, string>; // per-tile notes
   photos: string[]; // base64 — legacy flat array
   photosByField: Record<string, string[]>; // fieldId -> base64[] — per-field photos
   signatures: Record<string, string | null>; // signatureFieldId -> base64
+  /** Printed name under a signature, keyed by signature field id */
+  signerNames?: Record<string, string>;
+  /** When the signature was captured (ISO timestamp), keyed by signature field id */
+  signedAt?: Record<string, string>;
+  /** Language of the PDF: built-in template texts and fixed labels. Not set = English. */
+  pdfLanguage?: "en" | "es";
   customFields: Record<string, string>; // fieldId -> value
   additionalNotes?: string;
   reportNumber?: string;

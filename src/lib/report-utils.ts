@@ -50,6 +50,20 @@ export function formatDateUS(iso: string): string {
   return `${m}/${d}/${y}`;
 }
 
+/** Timestamp "2026-10-22T16:05:00.000Z" → "10/22/2026 11:05 AM CDT" in this device's time zone. */
+export function formatDateTimeUS(timestamp: string): string {
+  const d = new Date(timestamp);
+  if (isNaN(d.getTime())) return timestamp;
+  const date = `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}`;
+  const h = d.getHours();
+  const time = `${h % 12 || 12}:${String(d.getMinutes()).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+  let zone = "";
+  try {
+    zone = new Intl.DateTimeFormat("en-US", { timeZoneName: "short" }).formatToParts(d).find((p) => p.type === "timeZoneName")?.value || "";
+  } catch { /* no Intl time zone support - print without it */ }
+  return `${date} ${time}${zone ? ` ${zone}` : ""}`;
+}
+
 // ─── Upcoming inspections (from report history) ─────────────
 
 export interface InspectionReminder {
@@ -119,9 +133,13 @@ export function reminderWhen(daysLeft: number): string {
 // ─── "New from this one" — start a new report from an old one ───
 
 const isProtocolNumber = (f: CustomFieldDef) =>
-  f.id === "f_protocol_nr" || /(report|protocol|work order|job|ticket|inspection)\s*(no\.?|number|#)/i.test(f.label);
+  f.id === "f_protocol_nr" || /(report|protocol|work order|job|ticket|inspection|estimate)\s*(no\.?|number|#)/i.test(f.label);
 const isResult = (f: CustomFieldDef) =>
   f.id === "f_result" || /^\s*(result|overall|assessment|pass\s*\/\s*fail|inspection result)/i.test(f.label);
+/** Labels of things that belong to one visit - findings, readings, times, amounts. Used for
+ *  custom templates, whose fields carry no `reuse` flag. */
+const isVisitSpecific = (label: string) =>
+  /\b(results?|overall|assessment|pass|fail|findings?|deficienc\w*|recommend\w*|repairs?|notes?|comments?|observations?|work (performed|done)|description of work|readings?|measured|times?|hours|amounts?|quantity|qty)\b/i.test(label);
 
 export interface ReuseResult {
   draft: ReportDraft;
@@ -130,12 +148,17 @@ export interface ReuseResult {
 }
 
 /**
- * Copies client/object/device data into a fresh draft.
- *  - text, long text, number: copied (except protocol number and result/assessment fields)
- *  - dates: protocol date = today, next-inspection date = empty, other dates copied
- *  - tables: rows kept with identifying columns — measured numbers and assessments are cleared
- *  - activities, photos, signatures, extra notes: start empty
- *  - "Previous recommendations" ← previous notes (starter templates: f_notes → f_prev_recommendations)
+ * "New from this one": copies customer, site and equipment data into a fresh draft.
+ * Readings, results and findings never carry over - an old reading on a new report
+ * would look like a new measurement.
+ *  - "remember" fields (technician, licenses, test instruments): this device's remembered values
+ *  - reuse: false → starts empty; reuse: true → copied (nameplate data, sizes, types)
+ *  - not marked: text and long text copied (except report numbers, results, findings, times…), numbers start empty
+ *  - reuseFrom: filled with the old value of another field (e.g. previous main drain reading)
+ *  - dates: report date = today, next date = empty, other dates copied
+ *  - tables: reuse: false → fresh; otherwise rows keep text columns and columns marked reuse: true
+ *  - checklists, photos, signatures, extra notes: start empty
+ *  - "Previous recommendations" ← previous notes (f_notes → f_prev_recommendations)
  */
 export function buildReuseDraft(fields: CustomFieldDef[], base: ReportDraft, old: Partial<ReportDraft>): ReuseResult {
   const oldValues = old.customFields || {};
@@ -144,14 +167,26 @@ export function buildReuseDraft(fields: CustomFieldDef[], base: ReportDraft, old
   const mainDate = mainDateFieldId(fields);
   const ids = new Set(fields.map((f) => f.id));
   const mapNotes = ids.has("f_prev_recommendations") && ids.has("f_notes");
+  const filled = (v: unknown): v is string => typeof v === "string" && !!v.trim();
 
   for (const f of fields) {
+    const from = f.reuseFrom ? oldValues[f.reuseFrom] : undefined;
+    if (filled(from) && !from.startsWith('{"t":1')) {
+      cf[f.id] = from;
+      copied.push(f.id);
+      continue;
+    }
+
     const prev = oldValues[f.id];
-    if (typeof prev !== "string" || !prev.trim()) continue;
+    if (!filled(prev)) continue;
+    if (f.remember || f.reuse === false) continue;
+    if (mapNotes && (f.id === "f_notes" || f.id === "f_prev_recommendations")) continue;
 
     if (f.type === "text" || f.type === "textarea" || f.type === "number") {
-      if (isProtocolNumber(f) || isResult(f)) continue;
-      if (mapNotes && (f.id === "f_notes" || f.id === "f_prev_recommendations")) continue;
+      if (f.reuse !== true) {
+        if (f.type === "number") continue;
+        if (isProtocolNumber(f) || isResult(f) || isVisitSpecific(f.label)) continue;
+      }
       cf[f.id] = prev;
       copied.push(f.id);
     } else if (f.type === "date") {
@@ -162,9 +197,9 @@ export function buildReuseDraft(fields: CustomFieldDef[], base: ReportDraft, old
       const tv = parseTable(prev);
       if (!tv) continue;
       const cols = tableColumns(f, tv);
-      // keep identifiers (text, non-assessment choices like "Type A/B/C"); drop measurements and assessments
+      // keep identifiers: text columns and columns marked reuse: true; drop readings, results and choices
       const keep = cols
-        .filter((c) => !c.kind || c.kind === "text" || (c.kind === "choice" && !/result|assess|pass|fail|condition|status|\bok\b/i.test(c.label)))
+        .filter((c) => (c.reuse !== undefined ? c.reuse : (!c.kind || c.kind === "text") && !isVisitSpecific(c.label)))
         .map((c) => c.id);
       const rows: TableRow[] = filledRows(tv, f)
         .map((r) => {

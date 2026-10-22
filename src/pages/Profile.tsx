@@ -8,7 +8,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { SUPPORT_EMAIL } from "@/lib/site";
 
-const FIELD_SUGGESTIONS = [
+// Texas air conditioning & refrigeration contractors: 16 TAC §75.71(i) requires this notice
+// on proposals, invoices and written contracts, together with the license number.
+const TX_TDLR_NOTICE = "Regulated by The Texas Department of Licensing and Regulation, P.O. Box 12157, Austin, Texas 78711, 1-800-803-9202, 512-463-6599, www.tdlr.texas.gov";
+
+/** `chip` + `value`: a ready-made line added with its text and no label (printed as is). */
+const FIELD_SUGGESTIONS: { label: string; placeholder: string; chip?: string; value?: string }[] = [
   { label: "Address", placeholder: "e.g. 123 Main St, Springfield, IL 62701" },
   { label: "Phone", placeholder: "e.g. (555) 123-4567" },
   { label: "License #", placeholder: "e.g. State contractor license number" },
@@ -16,6 +21,7 @@ const FIELD_SUGGESTIONS = [
   { label: "Website", placeholder: "e.g. www.yourcompany.com" },
   { label: "Certifications", placeholder: "e.g. EPA 608 Universal, NATE" },
   { label: "Contact person", placeholder: "e.g. John Smith" },
+  { chip: "Texas HVAC notice (TDLR)", label: "", value: TX_TDLR_NOTICE, placeholder: "" },
 ];
 
 /** "1 day left" / "3 days left" */
@@ -56,11 +62,11 @@ export default function Profile() {
     update({ ...profile, fields: profile.fields.map((f) => f.id === id ? { ...f, ...partial } : f) });
   };
 
-  const addField = (label: string) => {
+  const addField = (s: (typeof FIELD_SUGGESTIONS)[number]) => {
     if (!profile) return;
-    const f: ProfileField = { id: `pf_${Date.now()}`, label, value: "" };
+    const f: ProfileField = { id: `pf_${Date.now()}`, label: s.label, value: s.value ?? "" };
     update({ ...profile, fields: [...profile.fields, f] });
-    toast.success(`Field added: ${label}`);
+    toast.success(`Field added: ${s.chip ?? s.label}`);
   };
 
   const removeField = (id: string) => {
@@ -123,7 +129,8 @@ export default function Profile() {
   }
 
   const usedLabels = new Set(profile.fields.map((f) => f.label));
-  const availableSuggestions = FIELD_SUGGESTIONS.filter((s) => !usedLabels.has(s.label));
+  const availableSuggestions = FIELD_SUGGESTIONS.filter((s) =>
+    s.value ? !profile.fields.some((f) => f.value.trim() === s.value) : !usedLabels.has(s.label));
 
   return (
     <div className="flex flex-1 flex-col">
@@ -204,9 +211,9 @@ export default function Profile() {
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Add a field</p>
           <div className="flex flex-wrap gap-1.5">
             {availableSuggestions.map((s) => (
-              <button key={s.label} onClick={() => addField(s.label)}
+              <button key={s.chip ?? s.label} onClick={() => addField(s)}
                 className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs hover:border-accent hover:bg-accent/5 transition-all">
-                <Plus className="h-3 w-3 inline mr-1" />{s.label}
+                <Plus className="h-3 w-3 inline mr-1" />{s.chip ?? s.label}
               </button>
             ))}
             <button

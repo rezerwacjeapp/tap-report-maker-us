@@ -23,6 +23,10 @@ const LOOKS: Record<string, TemplateLook> = {
   Bug: { emoji: "🐜", color: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300", dot: "bg-green-500", label: "PEST" },
   KeyRound: { emoji: "🔑", color: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300", dot: "bg-purple-500", label: "RENTAL" },
   ClipboardList: { emoji: "📋", color: "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300", dot: "bg-slate-500", label: "GENERAL" },
+  Wrench: { emoji: "🔧", color: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300", dot: "bg-indigo-500", label: "PLUMBING" },
+  Gauge: { emoji: "🚒", color: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300", dot: "bg-red-500", label: "FIRE PUMP" },
+  Lightbulb: { emoji: "💡", color: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300", dot: "bg-yellow-500", label: "LIGHTING" },
+  Receipt: { emoji: "🧾", color: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300", dot: "bg-emerald-500", label: "ESTIMATE" },
   // icons a custom template can still carry
   Zap: { emoji: "⚡", color: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300", dot: "bg-amber-500", label: "ELECTRIC" },
   Home: { emoji: "🏠", color: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300", dot: "bg-purple-500", label: "PROPERTY" },

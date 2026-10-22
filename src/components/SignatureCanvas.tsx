@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eraser } from "lucide-react";
 
@@ -10,7 +10,10 @@ interface Props {
 
 export function SignatureCanvas({ value, onChange, label }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [drawing, setDrawing] = useState(false);
+  // A ref, not state: a quick tap ends before React re-renders, and leaving the canvas
+  // without drawing must not save an empty white image as a "signature" (with a signing time).
+  const drawingRef = useRef(false);
+  const movedRef = useRef(false); // a tap without a stroke draws nothing
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -48,7 +51,8 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
 
   const start = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
-    setDrawing(true);
+    drawingRef.current = true;
+    movedRef.current = false;
     const ctx = canvasRef.current!.getContext("2d")!;
     const pos = getPos(e);
     ctx.beginPath();
@@ -56,8 +60,9 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
   };
 
   const move = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!drawing) return;
+    if (!drawingRef.current) return;
     e.preventDefault();
+    movedRef.current = true;
     const ctx = canvasRef.current!.getContext("2d")!;
     const pos = getPos(e);
     ctx.lineTo(pos.x, pos.y);
@@ -65,7 +70,9 @@ export function SignatureCanvas({ value, onChange, label }: Props) {
   };
 
   const end = () => {
-    setDrawing(false);
+    if (!drawingRef.current) return;
+    drawingRef.current = false;
+    if (!movedRef.current) return;
     const canvas = canvasRef.current!;
     onChange(canvas.toDataURL("image/png"));
   };
