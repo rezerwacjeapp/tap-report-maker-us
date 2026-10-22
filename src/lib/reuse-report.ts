@@ -16,8 +16,7 @@ export async function prepareReuse(report: ReportHistoryItem): Promise<string | 
   if (!templateId || !getTemplateById(templateId)) return null;
 
   sessionStorage.setItem("servisheet_reuse", JSON.stringify({
-    // the PDF language goes with the customer: a Spanish report starts the next one in Spanish
-    draft: { customFields: snapshot?.draft?.customFields || report.customFields, pdfLanguage: snapshot?.draft?.pdfLanguage },
+    draft: { customFields: snapshot?.draft?.customFields || report.customFields },
     label: `report ${report.reportNumber ? `#${report.reportNumber} ` : ""}dated ${formatDateUS(report.date)}`,
   }));
   return `/report?template=${encodeURIComponent(templateId)}&reuse=1`;

@@ -82,8 +82,6 @@ export interface ReportDraft {
   signerNames?: Record<string, string>;
   /** When the signature was captured (ISO timestamp), keyed by signature field id */
   signedAt?: Record<string, string>;
-  /** Language of the PDF: built-in template texts and fixed labels. Not set = English. */
-  pdfLanguage?: "en" | "es";
   customFields: Record<string, string>; // fieldId -> value
   additionalNotes?: string;
   reportNumber?: string;

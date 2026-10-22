@@ -52,8 +52,6 @@ export interface TemplatePreviewProps {
   /** printed names and signing times shown under the signature line */
   signerNames?: Record<string, string>;
   signedAt?: Record<string, string>;
-  /** PDF language: translates built-in template texts and fixed labels (same dictionary as the PDF) */
-  tr?: (s: string) => string;
   photosByField?: Record<string, string[]>;
   additionalNotes?: string;
   /** show diagonal free-plan watermark */
@@ -75,7 +73,6 @@ export function TemplatePreview({
   signatures = {},
   signerNames = {},
   signedAt = {},
-  tr,
   photosByField = {},
   additionalNotes,
   watermark = false,
@@ -123,7 +120,6 @@ export function TemplatePreview({
 
   const isFill = mode === "fill" || mode === "final";
   const clickable = mode === "fill" && !!onFieldClick;
-  const t = tr || ((s: string) => s);
 
   // ---- field renderers ----
   const renderField = (field: CustomFieldDef, idx: number) => {
@@ -132,7 +128,7 @@ export function TemplatePreview({
     if (field.type === "heading") {
       return (
         <div key={field.id} style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "14px 0 6px", ...labelCss }}>
-          {field.label ? t(field.label) : (mode === "edit" ? "Section heading" : "")}
+          {field.label || (mode === "edit" ? "Section heading" : "")}
         </div>
       );
     }
@@ -146,11 +142,11 @@ export function TemplatePreview({
         <div key={field.id} style={{ margin: "8px 0", ...(notPrinted ? { opacity: 0.55, border: "1px dashed #cbd5e1", padding: 6 } : {}) }}>
           {notPrinted && <div style={{ fontSize: 10, color: COLORS.gray, marginBottom: 2 }}>Not printed on the PDF</div>}
           {field.label && (
-            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.primary, marginBottom: 3, ...labelCss }}>{t(field.label)}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.primary, marginBottom: 3, ...labelCss }}>{field.label}</div>
           )}
           {(field.content || mode === "edit") && (
             <div style={{ fontSize: 12, color: COLORS.gray, lineHeight: 1.5, ...contentCss }}>
-              {field.content ? t(field.content) : (mode === "edit" ? "Info text…" : "")}
+              {field.content || (mode === "edit" ? "Info text…" : "")}
             </div>
           )}
         </div>
@@ -176,14 +172,14 @@ export function TemplatePreview({
       if (field.type === "textarea") {
         return (
           <div key={field.id} {...rowProps} style={{ margin: "6px 0", ...(rowProps as any).style }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray, ...labelCss }}>{t(field.label)}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray, ...labelCss }}>{field.label}</div>
             <div style={{ borderBottom: "1px solid #e5e7eb", paddingBottom: 4, marginTop: 2 }}>{valueNode}</div>
           </div>
         );
       }
       return (
         <div key={field.id} {...rowProps} style={{ display: "flex", gap: 12, padding: "5px 0", borderBottom: "1px solid #e5e7eb", ...(rowProps as any).style }}>
-          <div style={{ flex: "0 0 42%", fontSize: 12, fontWeight: 700, color: COLORS.gray, ...labelCss }}>{t(field.label)}</div>
+          <div style={{ flex: "0 0 42%", fontSize: 12, fontWeight: 700, color: COLORS.gray, ...labelCss }}>{field.label}</div>
           <div style={{ flex: 1 }}>{valueNode}</div>
         </div>
       );
@@ -212,13 +208,13 @@ export function TemplatePreview({
       const clickProps = clickable ? { onClick: () => onFieldClick!(field.id), style: { cursor: "pointer" as const } } : {};
       return (
         <div key={field.id} {...clickProps} style={{ margin: "10px 0 12px", ...(clickProps as any).style }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>{t(field.label)}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>{field.label}</div>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: cols.length > 5 ? 11 : 12, border: "0.5px solid #d1d5db" }}>
             <thead>
               <tr style={{ background: COLORS.primary, color: COLORS.white }}>
                 <th style={{ width: 28, padding: "5px 4px", fontWeight: 700 }}>#</th>
                 {cols.map((c) => (
-                  <th key={c.id} style={{ padding: "5px 4px", fontWeight: 700, textAlign: c.kind === "number" ? "right" : "left" }}>{t(c.label)}</th>
+                  <th key={c.id} style={{ padding: "5px 4px", fontWeight: 700, textAlign: c.kind === "number" ? "right" : "left" }}>{c.label}</th>
                 ))}
               </tr>
             </thead>
@@ -226,11 +222,8 @@ export function TemplatePreview({
               {rows.map((row, i) => (
                 <tr key={i} style={{ background: i % 2 === 0 ? COLORS.lightBg : COLORS.white, borderTop: "0.5px solid #d1d5db" }}>
                   <td style={{ textAlign: "center", padding: "5px 4px", color: COLORS.primary }}>{i + 1}</td>
-                  {cols.map((c, ci) => {
-                    const raw = row[c.id];
-                    // fixed texts: picked options and starting row names (the technician's own entries stay as typed)
-                    const fixed = c.kind === "choice" || (ci === 0 && (field.tableRows || []).includes((raw || "").trim()));
-                    const v = raw && fixed ? t(raw) : raw;
+                  {cols.map((c) => {
+                    const v = row[c.id];
                     return (
                       <td key={c.id} style={{
                         padding: "5px 4px", borderLeft: "0.5px solid #d1d5db",
@@ -254,27 +247,27 @@ export function TemplatePreview({
     if (field.type === "tiles" && field.tileOptions?.length) {
       return (
         <div key={field.id} style={{ margin: "10px 0 12px" }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>{t(field.label)}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>{field.label}</div>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "0.5px solid #d1d5db" }}>
             <thead>
               <tr style={{ background: COLORS.primary, color: COLORS.white }}>
                 <th style={{ width: 36, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>#</th>
-                <th style={{ padding: "5px 4px", textAlign: "left", fontWeight: 700, fontSize: 12 }}>{t("Item")}</th>
-                <th style={{ width: 54, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>{t("Status")}</th>
+                <th style={{ padding: "5px 4px", textAlign: "left", fontWeight: 700, fontSize: 12 }}>Item</th>
+                <th style={{ width: 54, padding: "5px 4px", fontWeight: 700, fontSize: 12 }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {(field.tileOptions || []).map((tile, i) => {
                 // no status = not checked: printed as "-", N/A only where the technician chose it
                 const state = isFill ? tileStates[tile.id] : undefined;
-                const statusText = state === "done" ? t("YES") : state === "fail" ? t("NO") : state === "na" ? t("N/A") : "-";
+                const statusText = state === "done" ? "YES" : state === "fail" ? "NO" : state === "na" ? "N/A" : "-";
                 const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
                 const note = isFill ? tileNotes[tile.id] : undefined;
                 return (
                   <Fragment key={tile.id}>
                     <tr style={{ background: bg, borderTop: "0.5px solid #d1d5db" }}>
                       <td style={{ textAlign: "center", padding: "5px 4px", color: COLORS.primary }}>{i + 1}</td>
-                      <td style={{ padding: "5px 4px", color: COLORS.primary }}>{t(tile.label)}</td>
+                      <td style={{ padding: "5px 4px", color: COLORS.primary }}>{tile.label}</td>
                       <td style={{ textAlign: "center", padding: "5px 4px", fontWeight: 700, color: "#18181b" }}>{statusText}</td>
                     </tr>
                     {note?.trim() && (
@@ -299,7 +292,7 @@ export function TemplatePreview({
       return (
         <div key={field.id} style={{ margin: "10px 0" }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px", ...labelCss }}>
-            {t(field.label || "Photos")}
+            {field.label || "Photos"}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {isFill
@@ -321,12 +314,12 @@ export function TemplatePreview({
       const sig = isFill ? signatures[field.id] : null;
       const name = isFill ? signerNames[field.id]?.trim() : "";
       const at = sig ? signedAt[field.id] : undefined;
-      const signerLine = [name ? `${t("Name")}: ${name}` : "", at ? `${t("Signed")}: ${formatDateTimeUS(at)}` : ""].filter(Boolean).join("   ");
+      const signerLine = [name ? `Name: ${name}` : "", at ? `Signed: ${formatDateTimeUS(at)}` : ""].filter(Boolean).join("   ");
       const align = (field.labelStyle?.align || "left") as "left" | "center" | "right";
       const items = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
       return (
         <div key={field.id} style={{ margin: "14px 0 4px", display: "flex", flexDirection: "column", alignItems: items }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, marginBottom: 6, ...labelCss }}>{t(field.label)}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, marginBottom: 6, ...labelCss }}>{field.label}</div>
           {sig ? (
             <img src={sig} alt="" style={{ height: 70, objectFit: "contain" }} />
           ) : (
@@ -407,7 +400,7 @@ export function TemplatePreview({
                 {detailFields.length > 0
                   ? detailFields.map((f) => (
                       <div key={f.id} style={{ fontSize: 12, color: COLORS.gray, lineHeight: 1.4 }}>
-                        {f.label ? `${t(f.label)}: ${f.value}` : f.value}
+                        {f.label ? `${f.label}: ${f.value}` : f.value}
                       </div>
                     ))
                   : mode === "edit" && (
@@ -422,7 +415,7 @@ export function TemplatePreview({
 
           {/* title row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-            <div style={{ fontSize: 19, fontWeight: 700, color: COLORS.primary }}>{pdfTitle ? t(pdfTitle) : "DOCUMENT TITLE"}</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: COLORS.primary }}>{pdfTitle || "DOCUMENT TITLE"}</div>
             {reportNumLabel && <div style={{ fontSize: 12, color: COLORS.gray }}>{reportNumLabel}</div>}
           </div>
 
@@ -437,15 +430,15 @@ export function TemplatePreview({
 
           {isFill && additionalNotes?.trim() && (
             <div style={{ margin: "10px 0" }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px" }}>{t("Additional notes")}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.primary, margin: "4px 0 8px" }}>Additional notes</div>
               <div style={{ fontSize: 13, color: COLORS.primary }}>{additionalNotes}</div>
             </div>
           )}
 
           {/* footer */}
           <div style={{ marginTop: 28, paddingTop: 8, borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", fontSize: 9, color: COLORS.gray }}>
-            <span>{t("Generated")}: __/__/____ • {companyName || "Servisheet"}</span>
-            <span>{t("Page")} 1 {t("of")} 1</span>
+            <span>Generated: __/__/____ • {companyName || "Servisheet"}</span>
+            <span>Page 1 of 1</span>
           </div>
           </div>
         </div>

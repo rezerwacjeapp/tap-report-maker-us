@@ -4,7 +4,6 @@ import type { CompanyProfile, ReportDraft, TextStyle, CustomFieldDef } from "./s
 import { getTiles, getCustomFields } from "./storage";
 import { parseTable, tableColumns, filledRows, serializeTable, colsSnapshot } from "./table-field";
 import { todayISO, isISODate, formatDateUS, formatDateTimeUS } from "./report-utils";
-import { translator } from "./pdf-i18n";
 
 // Register Roboto font (pdfmake default, covers Latin-extended characters)
 try {
@@ -143,9 +142,6 @@ export function buildReportDocument(
   const signatureFields = options?.signatureFields ?? [{ id: "sig_client", label: "Customer signature" }];
   const showCompanyHeader = options?.showCompanyHeader !== false;
   const watermark = options?.watermark === true;
-  // Spanish PDF: built-in template texts, picked options and fixed labels are translated;
-  // what the technician typed stays as typed.
-  const t = translator(draft.pdfLanguage === "es" ? "es" : "en");
 
   // Derive selected tiles from tileStates (done) or legacy selectedTiles
   const tileStates = draft.tileStates || {};
@@ -201,9 +197,9 @@ export function buildReportDocument(
 
     headerCols.push({
       stack: [
-        { text: firstField?.value || t("Company"), style: "companyName" },
+        { text: firstField?.value || "Company", style: "companyName" },
         ...restFields.map((f) => ({
-          text: f.label ? `${t(f.label)}: ${f.value}` : f.value,
+          text: f.label ? `${f.label}: ${f.value}` : f.value,
           style: "companyDetail",
         })),
       ],
@@ -226,7 +222,7 @@ export function buildReportDocument(
   // Title row
   content.push({
     columns: [
-      { text: t(pdfTitle), style: "title", width: "*" },
+      { text: pdfTitle, style: "title", width: "*" },
       ...(reportNum ? [{ text: reportNum, style: "reportNumber", width: "auto", alignment: "right" as const }] : []),
     ],
     margin: [0, 0, 0, 16] as [number, number, number, number],
@@ -261,7 +257,7 @@ export function buildReportDocument(
     // --- HEADING (static section header) ---
     if (field.type === "heading") {
       flushDataRows();
-      content.push(buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle, {
+      content.push(buildStyledLabel(field.label, "sectionHeader", field.labelStyle, {
         margin: [0, 10, 0, 6] as [number, number, number, number],
       }));
       return;
@@ -275,7 +271,7 @@ export function buildReportDocument(
       if (field.label) {
         const ls = field.labelStyle;
         infoStack.push({
-          text: t(field.label),
+          text: field.label,
           bold: ls?.bold ?? true,
           italics: ls?.italic || false,
           alignment: ls?.align || undefined,
@@ -287,7 +283,7 @@ export function buildReportDocument(
       if (field.content) {
         const cs = field.contentStyle;
         infoStack.push({
-          text: pdfSafe(t(field.content)),
+          text: pdfSafe(field.content),
           bold: cs?.bold || false,
           italics: cs?.italic || false,
           alignment: cs?.align || undefined,
@@ -313,14 +309,14 @@ export function buildReportDocument(
 
       if (field.type === "textarea") {
         pendingDataRows.push([
-          buildStyledLabel(t(field.label), "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
+          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { colSpan: 2, border: [false, false, false, false] }), {},
         ]);
         pendingDataRows.push([
           { text: pdfSafe(value), style: "fieldValue", colSpan: 2, border: [false, false, false, true], margin: [0, 0, 0, 4] as [number, number, number, number] }, {},
         ]);
       } else {
         pendingDataRows.push([
-          buildStyledLabel(t(field.label), "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
+          buildStyledLabel(field.label, "fieldLabel", field.labelStyle, { border: [false, false, false, true] }),
           { text: pdfSafe(value), style: "fieldValue", border: [false, false, false, true] },
         ]);
       }
@@ -340,7 +336,7 @@ export function buildReportDocument(
       const span = cols.length + 1;
       const titleRow: any[] = [
         {
-          ...buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle),
+          ...buildStyledLabel(field.label, "sectionHeader", field.labelStyle),
           colSpan: span,
           border: [false, false, false, false],
           margin: [-4, 4, 0, 6] as [number, number, number, number],
@@ -351,21 +347,17 @@ export function buildReportDocument(
       const headerRow: any[] = [
         { text: "#", style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary, alignment: "center" as const },
         ...cols.map((c) => ({
-          text: t(c.label), style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
+          text: c.label, style: "tableHeader", fontSize: cellSize, fillColor: COLORS.primary,
           alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
         })),
       ];
       const body: any[][] = [titleRow, headerRow];
-      const startRows = new Set((field.tableRows || []).map((r) => r.trim()));
-      // fixed texts in a table: picked options and the template's starting row names
-      const cellText = (c: import("./storage").TableColumnDef, ci: number, raw: string) =>
-        c.kind === "choice" || (ci === 0 && startRows.has(raw.trim())) ? t(raw) : raw;
       rows.forEach((row, i) => {
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
         body.push([
           { text: `${i + 1}`, style: "tableCell", fontSize: cellSize, fillColor: bg, alignment: "center" as const },
-          ...cols.map((c, ci) => ({
-            text: pdfSafe(cellText(c, ci, (row[c.id] ?? "").toString())), style: "tableCell", fontSize: cellSize, fillColor: bg,
+          ...cols.map((c) => ({
+            text: pdfSafe((row[c.id] ?? "").toString()), style: "tableCell", fontSize: cellSize, fillColor: bg,
             alignment: (c.kind === "number" ? "right" : "left") as "right" | "left",
             bold: c.kind === "choice",
           })),
@@ -401,8 +393,8 @@ export function buildReportDocument(
       const body: any[][] = [
         [
           { text: "#", style: "tableHeader", fillColor: COLORS.primary },
-          { text: t("Item"), style: "tableHeader", fillColor: COLORS.primary },
-          { text: t("Status"), style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
+          { text: "Item", style: "tableHeader", fillColor: COLORS.primary },
+          { text: "Status", style: "tableHeader", fillColor: COLORS.primary, alignment: "center" as const },
         ],
       ];
 
@@ -420,11 +412,11 @@ export function buildReportDocument(
         }
 
         const bg = i % 2 === 0 ? COLORS.lightBg : COLORS.white;
-        const statusText = state === "done" ? t("YES") : state === "fail" ? t("NO") : state === "na" ? t("N/A") : "-";
+        const statusText = state === "done" ? "YES" : state === "fail" ? "NO" : state === "na" ? "N/A" : "-";
 
         body.push([
           { text: `${i + 1}`, style: "tableCell", fillColor: bg, alignment: "center" as const },
-          { text: pdfSafe(t(tile.label)), style: "tableCell", fillColor: bg },
+          { text: pdfSafe(tile.label), style: "tableCell", fillColor: bg },
           {
             text: statusText,
             style: "tableCell", fillColor: bg, alignment: "center" as const,
@@ -447,7 +439,7 @@ export function buildReportDocument(
       // Wrap header + table in unbreakable stack so they don't split across pages
       content.push({
         stack: [
-          buildStyledLabel(t(field.label), "sectionHeader", field.labelStyle, { margin: [0, 4, 0, 8] as [number, number, number, number] }),
+          buildStyledLabel(field.label, "sectionHeader", field.labelStyle, { margin: [0, 4, 0, 8] as [number, number, number, number] }),
           {
             table: { headerRows: 1, widths: [30, "*", 45], body },
             layout: {
@@ -484,7 +476,7 @@ export function buildReportDocument(
 
         // First pair gets the section header attached
         if (i === 0) {
-          photoRow.unshift({ text: t(field.label || "Photos"), style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
+          photoRow.unshift({ text: field.label || "Photos", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] });
         }
 
         content.push({
@@ -505,7 +497,7 @@ export function buildReportDocument(
 
       const sigStack: any[] = [
         ...(heldInfo ? [heldInfo] : []),
-        { text: t(field.label), style: "sectionHeader", alignment: sigAlign, margin: [0, 8, 0, 6] as [number, number, number, number] },
+        { text: field.label, style: "sectionHeader", alignment: sigAlign, margin: [0, 8, 0, 6] as [number, number, number, number] },
       ];
       heldInfo = null;
 
@@ -526,7 +518,7 @@ export function buildReportDocument(
       // Under the line: printed name and the time the signature was captured
       const signer = (draft.signerNames || {})[field.id]?.trim();
       const signedAt = sigData ? (draft.signedAt || {})[field.id] : undefined;
-      const signerLine = [signer ? `${t("Name")}: ${signer}` : "", signedAt ? `${t("Signed")}: ${formatDateTimeUS(signedAt)}` : ""]
+      const signerLine = [signer ? `Name: ${signer}` : "", signedAt ? `Signed: ${formatDateTimeUS(signedAt)}` : ""]
         .filter(Boolean).join("   ");
 
       sigStack.push({
@@ -548,7 +540,7 @@ export function buildReportDocument(
   if (draft.additionalNotes?.trim()) {
     content.push({
       stack: [
-        { text: t("Additional notes"), style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
+        { text: "Additional notes", style: "sectionHeader", margin: [0, 4, 0, 8] as [number, number, number, number] },
         { text: draft.additionalNotes.trim(), style: "fieldValue" },
       ],
       unbreakable: true,
@@ -586,8 +578,8 @@ export function buildReportDocument(
     content,
     footer: (currentPage: number, pageCount: number) => ({
       columns: [
-        { text: `${t("Generated")}: ${generationDate} • ${profileFields[0]?.value || "Servisheet"}`, style: "footer", alignment: "left" as const },
-        { text: `${t("Page")} ${currentPage} ${t("of")} ${pageCount}`, style: "footer", alignment: "right" as const },
+        { text: `Generated: ${generationDate} • ${profileFields[0]?.value || "Servisheet"}`, style: "footer", alignment: "left" as const },
+        { text: `Page ${currentPage} of ${pageCount}`, style: "footer", alignment: "right" as const },
       ],
       margin: [40, 12, 40, 0] as [number, number, number, number],
     }),

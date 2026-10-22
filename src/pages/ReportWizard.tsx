@@ -5,7 +5,7 @@ import { SignatureCanvas } from "@/components/SignatureCanvas";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceButton } from "@/components/VoiceButton";
 import { TemplatePreview } from "@/components/TemplatePreview";
-import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare, History, Languages } from "lucide-react";
+import { ArrowLeft, FileDown, Check, Trash2, Eye, EyeOff, Plus, Loader2, Zap, Pause, X, MessageSquare, History } from "lucide-react";
 import {
   getDraft, saveDraft, clearDraft, hasDraft, getRememberedValues, rememberTemplateValues,
   type ReportDraft, type TextStyle, type CustomFieldDef,
@@ -169,7 +169,7 @@ export default function ReportWizard() {
         if (payload?.draft) {
           const { draft: d, copiedIds: ids } = buildReuseDraft(allFields, buildEmptyDraft(), payload.draft);
           clearDraft();
-          setDraft(payload.draft.pdfLanguage === "es" ? { ...d, pdfLanguage: "es" } : d);
+          setDraft(d);
           setCopiedIds(new Set(ids));
           setReuseInfo(payload.label || "the previous report");
           setInitialized(true);
@@ -292,17 +292,6 @@ export default function ReportWizard() {
     update({ signatures: { ...draft.signatures, [sigId]: data }, signedAt });
   };
   const updateSignerName = (sigId: string, name: string) => update({ signerNames: { ...(draft.signerNames || {}), [sigId]: name } });
-
-  // PDF language: built-in template texts and fixed labels in Spanish. The Spanish
-  // dictionary loads only when it's switched on, for the live preview.
-  const pdfLanguage = draft.pdfLanguage === "es" ? "es" : "en";
-  const [previewTr, setPreviewTr] = useState<((s: string) => string) | null>(null);
-  useEffect(() => {
-    if (pdfLanguage !== "es") { setPreviewTr(null); return; }
-    let live = true;
-    import("@/lib/pdf-i18n").then((m) => { if (live) setPreviewTr(() => m.translator("es")); }).catch(() => {});
-    return () => { live = false; };
-  }, [pdfLanguage]);
 
   // A typed-in number that already exists in history → ask before generating
   const [numberConflict, setNumberConflict] = useState<{ current: string; next: string; takenDate: string; takenClient: string } | null>(null);
@@ -531,15 +520,6 @@ export default function ReportWizard() {
         >
           {showCompanyHeader ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{showCompanyHeader ? "Company info shown" : "Company info hidden"}</span>
-        </button>
-        <button
-          onClick={() => update({ pdfLanguage: pdfLanguage === "es" ? "en" : "es" })}
-          className={`flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 transition-colors ${pdfLanguage === "es" ? "bg-accent/15 text-accent" : "bg-muted text-muted-foreground"}`}
-          title={pdfLanguage === "es" ? "PDF in Spanish - tap for English" : "PDF in English - tap for Spanish"}
-          aria-label="PDF language"
-        >
-          <Languages className="h-3.5 w-3.5" />
-          <span>PDF: {pdfLanguage === "es" ? "ES" : "EN"}</span>
         </button>
         <Button variant="ghost" size="icon" onClick={handleClearDraft}><Trash2 className="h-5 w-5 text-destructive" /></Button>
       </header>
@@ -844,7 +824,6 @@ export default function ReportWizard() {
               signatures={draft.signatures}
               signerNames={draft.signerNames}
               signedAt={draft.signedAt}
-              tr={pdfLanguage === "es" ? previewTr || undefined : undefined}
               photosByField={draft.photosByField}
               additionalNotes={draft.additionalNotes}
               onFieldClick={jumpToField}
