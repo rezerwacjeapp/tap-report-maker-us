@@ -123,7 +123,7 @@ export default function Login() {
       <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-5 py-10">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center space-y-2">
-            <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+            <a href="/" className="inline-block" aria-label="Servisheet - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
             <p className="text-sm text-muted-foreground">Reset your password</p>
           </div>
 
@@ -176,7 +176,7 @@ export default function Login() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
-          <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <a href="/" className="inline-block" aria-label="Servisheet - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
           <p className="text-sm text-muted-foreground">Service reports in 60 seconds</p>
         </div>
 

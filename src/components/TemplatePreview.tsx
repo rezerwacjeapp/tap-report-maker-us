@@ -369,8 +369,8 @@ export function TemplatePreview({
           {watermark && (
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", overflow: "hidden", zIndex: 5 }}>
               <div style={{ transform: "rotate(-35deg)", fontSize: 64, fontWeight: 700, whiteSpace: "nowrap", opacity: 0.13, fontFamily: "Helvetica, Arial, sans-serif" }}>
-                <span style={{ color: COLORS.primary }}>Raport</span>
-                <span style={{ color: COLORS.accent }}>ON</span>
+                <span style={{ color: COLORS.primary }}>Servi</span>
+                <span style={{ color: COLORS.accent }}>sheet</span>
                 <span style={{ color: COLORS.primary }}>.com</span>
               </div>
             </div>
@@ -423,7 +423,7 @@ export function TemplatePreview({
 
           {/* footer */}
           <div style={{ marginTop: 28, paddingTop: 8, borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", fontSize: 9, color: COLORS.gray }}>
-            <span>Generated: __/__/____ • {companyName || "RaportON"}</span>
+            <span>Generated: __/__/____ • {companyName || "Servisheet"}</span>
             <span>Page 1 of 1</span>
           </div>
           </div>

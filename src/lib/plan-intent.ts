@@ -3,7 +3,7 @@
  * choice until the user is signed in (also after the email link and Google sign-in),
  * then open the purchase page /upgrade.
  */
-const KEY = "raporton_pending_plan";
+const KEY = "servisheet_pending_plan";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 h
 
 export function wantsSolo(search: string): boolean {

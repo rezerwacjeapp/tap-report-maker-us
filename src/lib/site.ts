@@ -1,6 +1,6 @@
-/** Public contact details of RaportON (raporton.com). */
-export const SITE_URL = "https://raporton.com";
-export const SUPPORT_EMAIL = "support@raporton.com";
+/** Public contact details of Servisheet (servisheet.com). */
+export const SITE_URL = "https://servisheet.com";
+export const SUPPORT_EMAIL = "support@servisheet.com";
 
 /**
  * Date (YYYY-MM-DD, UTC) of the Terms of Service / Privacy Policy users must accept.

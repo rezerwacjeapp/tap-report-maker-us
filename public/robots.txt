@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://raporton.com/sitemap.xml
+Sitemap: https://servisheet.com/sitemap.xml

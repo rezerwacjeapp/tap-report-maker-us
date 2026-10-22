@@ -15,7 +15,7 @@ export async function prepareReuse(report: ReportHistoryItem): Promise<string | 
     getAllTemplates().find((t) => t.name === report.templateName)?.id;
   if (!templateId || !getTemplateById(templateId)) return null;
 
-  sessionStorage.setItem("raporton_reuse", JSON.stringify({
+  sessionStorage.setItem("servisheet_reuse", JSON.stringify({
     draft: { customFields: snapshot?.draft?.customFields || report.customFields },
     label: `report ${report.reportNumber ? `#${report.reportNumber} ` : ""}dated ${formatDateUS(report.date)}`,
   }));

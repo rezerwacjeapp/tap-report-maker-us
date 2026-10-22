@@ -121,14 +121,14 @@ export default function ImportTemplate() {
           <div className="space-y-3">
             <Link
               to="/login"
-              onClick={() => localStorage.setItem("raporton_pending_import", code!)}
+              onClick={() => localStorage.setItem("servisheet_pending_import", code!)}
               className="block h-11 rounded-xl bg-accent text-white font-medium leading-[2.75rem] text-center active:scale-[0.98] transition-transform"
             >
               Sign in
             </Link>
             <Link
               to="/register"
-              onClick={() => localStorage.setItem("raporton_pending_import", code!)}
+              onClick={() => localStorage.setItem("servisheet_pending_import", code!)}
               className="block h-11 rounded-xl border border-border text-foreground font-medium leading-[2.75rem] text-center active:scale-[0.98] transition-transform"
             >
               Create account

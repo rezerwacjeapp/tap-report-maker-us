@@ -26,7 +26,7 @@ import { wantsSolo, rememberSoloIntent, takeSoloIntent } from "./lib/plan-intent
 function lazyPage<T extends ComponentType<any>>(load: () => Promise<{ default: T }>) {
   return lazy(() =>
     load().catch((err) => {
-      const KEY = "raporton_chunk_reload";
+      const KEY = "servisheet_chunk_reload";
       const last = Number(sessionStorage.getItem(KEY) || 0);
       if (Date.now() - last > 30_000) {
         sessionStorage.setItem(KEY, String(Date.now()));
@@ -94,9 +94,9 @@ function AppShell() {
         .catch(() => { if (!cancelled) setConsentChecked(true); });
 
     // Consent given at email sign-up - applied on first sign-in, only to the account that gave it
-    const pending = localStorage.getItem("raporton_pending_consent");
+    const pending = localStorage.getItem("servisheet_pending_consent");
     if (pending) {
-      localStorage.removeItem("raporton_pending_consent");
+      localStorage.removeItem("servisheet_pending_consent");
       try {
         const { marketing, email, acceptedAt } = JSON.parse(pending);
         if (!email || String(email).toLowerCase() === userEmail.toLowerCase()) {
@@ -118,9 +118,9 @@ function AppShell() {
   // Redirect to pending import (or the Solo purchase page) after login + consent
   useEffect(() => {
     if (!user || !consentChecked || needsConsent) return;
-    const pendingImport = localStorage.getItem("raporton_pending_import");
+    const pendingImport = localStorage.getItem("servisheet_pending_import");
     if (pendingImport) {
-      localStorage.removeItem("raporton_pending_import");
+      localStorage.removeItem("servisheet_pending_import");
       navigate(`/t/${pendingImport}`, { replace: true });
       return;
     }

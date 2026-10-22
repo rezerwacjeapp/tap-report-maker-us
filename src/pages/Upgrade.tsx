@@ -121,7 +121,7 @@ export default function Upgrade() {
             // Without the portal link there must still be a way to cancel
             <p className="mt-8 max-w-xs text-xs text-muted-foreground">
               To cancel or manage your subscription, email{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Manage my RaportON subscription")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
+              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Manage my Servisheet subscription")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
               {" "}from your account email address. If you cancel, Solo stays active until the end of the period you paid for.
             </p>
           )}
@@ -166,7 +166,7 @@ export default function Upgrade() {
                   <span className="text-sm text-accent font-semibold">with watermark</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Unlimited reports. Every PDF carries a "RaportON.com" watermark. Upgrade to Solo to remove it.
+                  Unlimited reports. Every PDF carries a "Servisheet.com" watermark. Upgrade to Solo to remove it.
                 </p>
               </>
             )}
@@ -199,7 +199,7 @@ export default function Upgrade() {
                 <Check className="h-4 w-4 text-accent shrink-0" /> Photos, signatures, dictation
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Droplet className="h-4 w-4 text-muted-foreground shrink-0" /> "RaportON.com" watermark on PDFs
+                <Droplet className="h-4 w-4 text-muted-foreground shrink-0" /> "Servisheet.com" watermark on PDFs
               </div>
             </div>
           </div>

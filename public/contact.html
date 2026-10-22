@@ -6,9 +6,9 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact | RaportON</title>
-  <meta name="description" content="Contact the RaportON team - questions, ideas and technical support.">
-  <link rel="canonical" href="https://raporton.com/contact">
+  <title>Contact | Servisheet</title>
+  <meta name="description" content="Contact the Servisheet team - questions, ideas and technical support.">
+  <link rel="canonical" href="https://servisheet.com/contact">
   <meta name="robots" content="index, follow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -113,7 +113,7 @@
 
 <header>
   <div class="header-bar">
-    <a href="/" class="brand" aria-label="RaportON - home"><img src="/favicon.svg" alt="" width="24" height="24"><span>Raport<span class="on">ON</span></span></a>
+    <a href="/" class="brand" aria-label="Servisheet - home"><img src="/favicon.svg" alt="" width="24" height="24"><span>Servi<span class="on">sheet</span></span></a>
     <a href="/" class="back-link">← Home</a>
   </div>
 </header>
@@ -124,13 +124,13 @@
     <p class="lead">Have a question, an idea or need help? Write to us - we're happy to help.</p>
 
     <div class="contact-methods">
-      <a href="mailto:support@raporton.com" class="contact-card">
+      <a href="mailto:support@servisheet.com" class="contact-card">
         <div class="contact-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         </div>
         <div style="min-width:0">
           <div class="contact-label">Email</div>
-          <div class="contact-value">support@raporton.com</div>
+          <div class="contact-value">support@servisheet.com</div>
         </div>
       </a>
       <a href="/" class="contact-card">
@@ -139,7 +139,7 @@
         </div>
         <div>
           <div class="contact-label">Website</div>
-          <div class="contact-value">raporton.com</div>
+          <div class="contact-value">servisheet.com</div>
         </div>
       </a>
     </div>
@@ -195,7 +195,7 @@
 
       <div class="status-msg status-error" id="errorMsg" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        <p><strong>Something went wrong.</strong> Please try again or email us directly at <a href="mailto:support@raporton.com" style="color: #ef4444; font-weight: 500;">support@raporton.com</a>.</p>
+        <p><strong>Something went wrong.</strong> Please try again or email us directly at <a href="mailto:support@servisheet.com" style="color: #ef4444; font-weight: 500;">support@servisheet.com</a>.</p>
       </div>
     </div>
 
@@ -204,12 +204,12 @@
       <p>We usually reply within <strong>one business day</strong>. Our team works from Europe (Central European Time), so answers to messages sent in the U.S. afternoon may arrive the next morning.</p>
     </div>
 
-    <p class="operator">RaportON is operated by akApp Studio (<a href="https://akappstudio.pl" target="_blank" rel="noopener">akappstudio.pl</a>), the trade name of Andrzej Król, ul. Słoneczna 10a, 33-383 Tylicz, Poland.</p>
+    <p class="operator">Servisheet is operated by akApp Studio (<a href="https://akappstudio.pl" target="_blank" rel="noopener">akappstudio.pl</a>), the trade name of Andrzej Król, ul. Słoneczna 10a, 33-383 Tylicz, Poland.</p>
   </div>
 </main>
 
 <footer>
-  <div>© 2026 RaportON. All rights reserved. · Created by <a href="https://akappstudio.pl" target="_blank" rel="noopener" style="color: var(--accent-ink); font-weight: 500;">akApp Studio</a></div>
+  <div>© 2026 Servisheet. All rights reserved. · Created by <a href="https://akappstudio.pl" target="_blank" rel="noopener" style="color: var(--accent-ink); font-weight: 500;">akApp Studio</a></div>
   <div class="links">
     <a href="/terms">Terms of Service</a>
     <a href="/privacy">Privacy Policy</a>
@@ -217,7 +217,7 @@
   </div>
 </footer>
 <script>
-// web3forms.com access key - messages are delivered to the RaportON support inbox
+// web3forms.com access key - messages are delivered to the Servisheet support inbox
 const WEB3FORMS_KEY = '7d8aba20-e633-443f-b73a-0571cc40e49f';
 
 function flag(id) {
@@ -257,12 +257,12 @@ async function sendForm() {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
         access_key: WEB3FORMS_KEY,
-        subject: 'RaportON US - ' + topic,
-        from_name: name || 'raporton.com contact form',
+        subject: 'Servisheet - ' + topic,
+        from_name: name || 'servisheet.com contact form',
         email: email,
         message: message,
         topic: topic,
-        site: 'raporton.com'
+        site: 'servisheet.com'
       })
     });
     var data = await response.json();

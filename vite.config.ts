@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB — pdfmake fonts are ~2MB
       },
       manifest: {
-        name: "RaportON - Service Reports",
-        short_name: "RaportON",
+        name: "Servisheet - Service Reports",
+        short_name: "Servisheet",
         description: "Professional service report PDFs in 60 seconds",
         lang: "en-US",
         theme_color: "#1e2a38",

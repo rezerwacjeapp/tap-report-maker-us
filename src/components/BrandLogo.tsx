@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-/** The RaportON document-with-a-bolt icon (vector redraw of the original app icon). */
+/** The Servisheet document-with-a-bolt icon (vector redraw of the original app icon). */
 export function BrandMark({ className = "h-8 w-auto", title }: { className?: string; title?: string }) {
   const uid = useId().replace(/:/g, "");
   const body = `rb${uid}`, band = `rw${uid}`, shade = `rs${uid}`;
@@ -30,7 +30,7 @@ export function BrandMark({ className = "h-8 w-auto", title }: { className?: str
   );
 }
 
-/** Icon + "RaportON" wordmark. */
+/** Icon + "Servisheet" wordmark. */
 export function BrandLockup({ className = "", markClassName = "h-8 w-auto", textClassName = "text-2xl" }: {
   className?: string; markClassName?: string; textClassName?: string;
 }) {
@@ -38,7 +38,7 @@ export function BrandLockup({ className = "", markClassName = "h-8 w-auto", text
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <BrandMark className={markClassName} />
       <span className={`font-display font-bold tracking-tight text-foreground ${textClassName}`}>
-        Raport<span className="text-accent">ON</span>
+        Servi<span className="text-accent">sheet</span>
       </span>
     </span>
   );

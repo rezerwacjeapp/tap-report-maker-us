@@ -41,7 +41,7 @@ export function ConsentModal({ onAccepted, updated = false }: Props) {
           </h2>
           <p className="text-sm text-muted-foreground">
             {updated
-              ? "We've updated our Terms of Service and Privacy Policy. Please review and accept them to keep using RaportON."
+              ? "We've updated our Terms of Service and Privacy Policy. Please review and accept them to keep using Servisheet."
               : "One more step - please confirm below"}
           </p>
         </div>
@@ -56,7 +56,7 @@ export function ConsentModal({ onAccepted, updated = false }: Props) {
               className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
             />
             <span className="text-sm leading-snug">
-              I am at least 18 years old, I will use RaportON for my business, and I agree to the{" "}
+              I am at least 18 years old, I will use Servisheet for my business, and I agree to the{" "}
               <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
               {" "}and{" "}
               <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>
@@ -74,7 +74,7 @@ export function ConsentModal({ onAccepted, updated = false }: Props) {
                 className="mt-0.5 h-5 w-5 rounded border-border accent-accent shrink-0"
               />
               <span className="text-sm leading-snug text-muted-foreground">
-                Send me occasional emails about RaportON updates and offers
+                Send me occasional emails about Servisheet updates and offers
               </span>
             </label>
           )}

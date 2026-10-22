@@ -10,7 +10,7 @@ export default function Landing() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-[#f0f2f5]">
       <div className="text-center">
         <div className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
-          Raport<span className="text-emerald-500">ON</span>
+          Servi<span className="text-emerald-500">sheet</span>
         </div>
       </div>
     </div>

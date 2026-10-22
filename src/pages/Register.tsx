@@ -66,7 +66,7 @@ export default function Register() {
     } else {
       // Save consent flags — applied when this user confirms the email and first signs in
       localStorage.setItem(
-        "raporton_pending_consent",
+        "servisheet_pending_consent",
         JSON.stringify({ terms: true, marketing, email: email.trim(), acceptedAt: new Date().toISOString() })
       );
       setSuccess(true);
@@ -104,7 +104,7 @@ export default function Register() {
       <div className="w-full max-w-sm space-y-8">
         {/* Brand */}
         <div className="text-center space-y-2">
-          <a href="/" className="inline-block" aria-label="RaportON - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
+          <a href="/" className="inline-block" aria-label="Servisheet - home"><BrandLockup markClassName="h-10 w-auto" textClassName="text-3xl" /></a>
           <p className="text-sm text-muted-foreground">Create your free account</p>
         </div>
 
@@ -186,7 +186,7 @@ export default function Register() {
                   className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
                 />
                 <span className="text-xs leading-snug text-foreground">
-                  I am at least 18 years old, I will use RaportON for my business, and I agree to the{" "}
+                  I am at least 18 years old, I will use Servisheet for my business, and I agree to the{" "}
                   <a href="/terms" target="_blank" className="text-accent underline">Terms of Service</a>
                   {" "}and{" "}
                   <a href="/privacy" target="_blank" className="text-accent underline">Privacy Policy</a>
@@ -201,7 +201,7 @@ export default function Register() {
                   className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
                 />
                 <span className="text-xs leading-snug text-muted-foreground">
-                  Send me occasional emails about RaportON updates and offers
+                  Send me occasional emails about Servisheet updates and offers
                 </span>
               </label>
             </div>

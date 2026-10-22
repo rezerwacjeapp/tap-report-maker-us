@@ -250,7 +250,7 @@ export default function Profile() {
                     ? "Reports without a watermark"
                     : planInfo.plan === "trial"
                       ? `${trialLeftText(planInfo.trialDaysLeft ?? 0)}, then PDFs carry a watermark`
-                      : "Every PDF carries a \"RaportON.com\" watermark"}
+                      : "Every PDF carries a \"Servisheet.com\" watermark"}
                 </p>
               </div>
               {planInfo.plan === "solo" ? (
@@ -275,7 +275,7 @@ export default function Profile() {
           {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
           <p className="text-[11px] text-muted-foreground">
             To delete your account and data, email{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my RaportON account")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
+            <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my Servisheet account")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
             {" "}from this address.
           </p>
         </div>

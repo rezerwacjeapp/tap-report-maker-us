@@ -165,8 +165,8 @@ export default function ReportWizard() {
     // Starting from a previous report ("New from this one")?
     if (reuseParam) {
       try {
-        const raw = sessionStorage.getItem("raporton_reuse");
-        sessionStorage.removeItem("raporton_reuse");
+        const raw = sessionStorage.getItem("servisheet_reuse");
+        sessionStorage.removeItem("servisheet_reuse");
         const payload = raw ? JSON.parse(raw) : null;
         if (payload?.draft) {
           const { draft: d, copiedIds: ids } = buildReuseDraft(allFields, buildEmptyDraft(), payload.draft);
@@ -482,7 +482,7 @@ export default function ReportWizard() {
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3 pt-2">
               <p>
-                On the Free plan you can create unlimited reports, but every PDF carries a "RaportON.com" watermark.
+                On the Free plan you can create unlimited reports, but every PDF carries a "Servisheet.com" watermark.
               </p>
               <p>
                 Upgrade to <strong>Solo for $9.99/month</strong> to create reports without the watermark.

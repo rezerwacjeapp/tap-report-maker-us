@@ -14,8 +14,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { SUPPORT_EMAIL } from "@/lib/site";
 
-const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
-const QUICK_START_KEY = "raporton_quick_start";
+const HIDDEN_STARTERS_KEY = "servisheet_hidden_starters";
+const QUICK_START_KEY = "servisheet_quick_start";
 
 function getHiddenStarters(): Set<string> {
   try {
@@ -169,7 +169,7 @@ const Index = () => {
         </p>
       ) : planInfo.plan === "free" ? (
         <p className="text-[11px] text-muted-foreground">
-          Unlimited reports. Every PDF carries a "RaportON.com" watermark. Upgrade to Solo to remove it.
+          Unlimited reports. Every PDF carries a "Servisheet.com" watermark. Upgrade to Solo to remove it.
         </p>
       ) : (
         <p className="text-sm text-muted-foreground">
@@ -184,7 +184,7 @@ const Index = () => {
       {/* Header */}
       <header className="px-5 pt-8 pb-2 flex items-start justify-between">
         <div>
-          <h1 className="sr-only">RaportON</h1>
+          <h1 className="sr-only">Servisheet</h1>
           <BrandLockup markClassName="h-8 w-auto" textClassName="text-2xl" />
           <p className="text-sm text-muted-foreground mt-1">Service reports in a minute</p>
         </div>
@@ -441,7 +441,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="px-5 py-3 text-center">
-        <p className="text-[11px] text-muted-foreground">RaportON v2.0</p>
+        <p className="text-[11px] text-muted-foreground">Servisheet v2.0</p>
       </footer>
     </div>
   );

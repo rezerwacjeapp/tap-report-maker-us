@@ -18,7 +18,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const HIDDEN_STARTERS_KEY = "raporton_hidden_starters";
+const HIDDEN_STARTERS_KEY = "servisheet_hidden_starters";
 
 function getHiddenStarters(): Set<string> {
   try {
@@ -31,7 +31,7 @@ function saveHiddenStarters(ids: Set<string>) {
   localStorage.setItem(HIDDEN_STARTERS_KEY, JSON.stringify([...ids]));
 }
 
-const QUICK_START_KEY = "raporton_quick_start";
+const QUICK_START_KEY = "servisheet_quick_start";
 
 function getQuickStartIds(): Set<string> {
   try {
@@ -120,7 +120,7 @@ export default function SelectTemplate() {
       const code = await shareTemplate(template);
       const url = `${window.location.origin}/t/${code}`;
       if (navigator.share) {
-        await navigator.share({ title: template.name, text: `RaportON template: ${template.name}`, url });
+        await navigator.share({ title: template.name, text: `Servisheet template: ${template.name}`, url });
       } else {
         await navigator.clipboard.writeText(url);
         toast.success("Link copied to clipboard");
