@@ -19,6 +19,14 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/stripe-webhook") return handleStripeWebhook(request, env);
 
+    // The service worker caches /index.html as the app shell for every page. Cloudflare
+    // answers /index.html with a redirect to "/", and "/" gives guests the landing page,
+    // so the app shell got replaced by the landing page. Serve the app here directly.
+    if (url.pathname === "/index.html") {
+      url.pathname = "/";
+      return env.ASSETS.fetch(new Request(url, request));
+    }
+
     if (url.pathname === "/") {
       const signedIn = /(?:^|;\s*)ro_session=1(?:;|$)/.test(request.headers.get("cookie") || "");
       if (!signedIn && !url.searchParams.has("code") && !url.searchParams.has("error_description")) {
