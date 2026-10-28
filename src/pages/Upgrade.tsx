@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { checkReportLimit } from "@/lib/supabase-storage";
 import { useAuth } from "@/hooks/use-auth";
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { supabase } from "@/lib/supabase";
 
-// Stripe Payment Link of the US account (USD price). Set in Vercel as VITE_STRIPE_PAYMENT_LINK;
-// without it the upgrade button is disabled, so nobody can pay through a wrong account.
+// Stripe Payment Link of the US account (USD price). Set in Cloudflare (servisheet → Settings →
+// Build → Variables and secrets) as VITE_STRIPE_PAYMENT_LINK; without it the upgrade button is
+// disabled, so nobody can pay through a wrong account.
 const STRIPE_PAYMENT_LINK = (import.meta.env.VITE_STRIPE_PAYMENT_LINK as string | undefined)?.trim() || "";
-// Stripe customer portal login link (Stripe → Settings → Billing → Customer portal → "Activate link").
-// Set in Vercel as VITE_STRIPE_PORTAL_URL; without it the "Manage subscription" link is hidden.
+// Stripe customer portal login link (Stripe → Settings → Billing → Customer portal → "Activate link"),
+// set the same way as VITE_STRIPE_PORTAL_URL. Only a fallback now: "Manage subscription" opens the
+// portal through /api/billing-portal, which doesn't depend on the email used at checkout.
 const STRIPE_PORTAL_URL = (import.meta.env.VITE_STRIPE_PORTAL_URL as string | undefined)?.trim() || "";
 const PRICE = "$9.99";
 
@@ -26,6 +29,9 @@ export default function Upgrade() {
   // Express consent to the automatic renewal terms, required before going to Stripe
   const [renewalOk, setRenewalOk] = useState(false);
   const [renewalError, setRenewalError] = useState(false);
+  // "Manage subscription": opening the Stripe portal / it couldn't be opened
+  const [portalBusy, setPortalBusy] = useState(false);
+  const [portalFailed, setPortalFailed] = useState(false);
 
   useEffect(() => {
     checkReportLimit()
@@ -71,6 +77,37 @@ export default function Upgrade() {
     window.location.href = url;
   };
 
+  /**
+   * Opens the Stripe portal for the customer who paid for this account's subscription.
+   * Stripe's email login link is the fallback - it only works with the email used to pay.
+   */
+  const openPortal = async () => {
+    if (portalBusy) return;
+    setPortalBusy(true);
+    setPortalFailed(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/billing-portal", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session?.access_token ?? ""}` },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && typeof body.url === "string") {
+        window.location.href = body.url;
+        return; // the page is leaving, keep the button busy
+      }
+      throw new Error(body.error || `HTTP ${res.status}`);
+    } catch (e) {
+      console.warn("Billing portal:", e);
+      if (STRIPE_PORTAL_URL) {
+        window.location.href = `${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`;
+        return;
+      }
+      setPortalFailed(true);
+    }
+    setPortalBusy(false);
+  };
+
   // Checking payment state
   if (checkingPayment) {
     return (
@@ -103,28 +140,26 @@ export default function Upgrade() {
           <h2 className="text-2xl font-bold">Solo plan is active!</h2>
           <p className="text-muted-foreground mt-2">Unlimited reports, no watermark.</p>
           <Button className="mt-6" onClick={() => navigate("/")}>Back to the app</Button>
-          {STRIPE_PORTAL_URL ? (
-            <div className="mt-8 max-w-xs">
-              <a
-                href={`${STRIPE_PORTAL_URL}${user?.email ? `?prefilled_email=${encodeURIComponent(user.email)}` : ""}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
-              >
-                <Settings2 className="h-4 w-4" /> Manage subscription
-              </a>
-              <p className="text-xs text-muted-foreground mt-2">
-                Receipts, payment card and cancellation. If you cancel, Solo stays active until the end of the period you paid for.
-              </p>
-            </div>
-          ) : (
-            // Without the portal link there must still be a way to cancel
-            <p className="mt-8 max-w-xs text-xs text-muted-foreground">
-              To cancel or manage your subscription, email{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Manage my Servisheet subscription")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
-              {" "}from your account email address. If you cancel, Solo stays active until the end of the period you paid for.
+          <div className="mt-8 max-w-xs">
+            <button
+              onClick={openPortal}
+              disabled={portalBusy}
+              className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline disabled:opacity-60"
+            >
+              {portalBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings2 className="h-4 w-4" />} Manage subscription
+            </button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Receipts, payment card and cancellation. If you cancel, Solo stays active until the end of the period you paid for.
             </p>
-          )}
+            {portalFailed && (
+              // there must always be a way to cancel
+              <p className="text-xs text-destructive mt-2">
+                Couldn't open the subscription page. Try again in a moment, or email{" "}
+                <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Manage my Servisheet subscription")}`} className="underline">{SUPPORT_EMAIL}</a>
+                {" "}from your account email address.
+              </p>
+            )}
+          </div>
         </main>
       </div>
     );

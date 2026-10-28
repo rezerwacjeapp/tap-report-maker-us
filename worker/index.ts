@@ -1,7 +1,8 @@
 /**
  * Cloudflare Worker entry for servisheet.com.
  * Static files (the app, landing, legal pages) are served from ./dist by Cloudflare;
- * this script runs only for "/" and /api/* (see run_worker_first in wrangler.jsonc).
+ * this script runs only for "/", /index.html and /api/* (see run_worker_first in wrangler.jsonc):
+ * /api/stripe-webhook (Stripe events) and /api/billing-portal ("Manage subscription").
  *
  * "/" does what middleware.ts did on Vercel: visitors and search engines get the
  * marketing page (landing.html) right at the root URL. Signed-in browsers carry the
@@ -9,6 +10,7 @@
  * with ?code= (or an auth error) also goes to the app.
  */
 import { handleStripeWebhook, type Env as WebhookEnv } from "../functions/api/stripe-webhook";
+import { handleBillingPortal } from "../functions/api/billing-portal";
 
 interface Env extends WebhookEnv {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -18,6 +20,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/stripe-webhook") return handleStripeWebhook(request, env);
+    if (url.pathname === "/api/billing-portal") return handleBillingPortal(request, env);
 
     // The service worker caches /index.html as the app shell for every page. Cloudflare
     // answers /index.html with a redirect to "/", and "/" gives guests the landing page,
