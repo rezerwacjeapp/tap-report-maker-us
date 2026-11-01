@@ -285,6 +285,10 @@ export default function Profile() {
             <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my Servisheet account")}`} className="text-accent underline">{SUPPORT_EMAIL}</a>
             {" "}from this address.
           </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="py-1 text-muted-foreground underline underline-offset-2 hover:text-accent">Terms of Service</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="py-1 text-muted-foreground underline underline-offset-2 hover:text-accent">Privacy Policy</a>
+          </div>
         </div>
       </main>
     </div>
