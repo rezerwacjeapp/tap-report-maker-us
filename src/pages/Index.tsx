@@ -423,7 +423,7 @@ const Index = () => {
               <strong>Tip:</strong> Fill in your{" "}
               <span className="text-accent font-semibold cursor-pointer" onClick={() => navigate("/profile")}>
                 company profile
-              </span>
+              </span>{" "}
               so your details appear on every report automatically.
             </p>
           </div>
